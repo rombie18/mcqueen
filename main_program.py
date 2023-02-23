@@ -1,5 +1,6 @@
 import board
 import time
+import math
 
 from simple_pid import PID
 from busio import I2C
@@ -73,7 +74,7 @@ class McQueen:
         self.actuator_motor.throttle = self.motor_pid(self.velocity)
 
     def cycle_loop_steering(self):
-        self.actuator_servo.angle = self.servo_pid(self.heading)
+        self.actuator_servo.angle = self.servo_pid(self.transform_heading_to_angle(self.heading))
 
     def calculate_velocity(self):
         # TODO
@@ -83,6 +84,18 @@ class McQueen:
     def calculate_heading(self):
         self.heading = self.sensor_imu.euler[0]
 
+    ## Helper functions
+    def transform_heading_to_angle(self, heading):
+        if heading > 180:
+            if heading > 270:
+                return -heading + 450
+            else:
+                return 180
+        else:
+            if heading < 90:
+                return -heading + 90
+            else:
+                return 0
 
     ## Test functions
     def test_imu(self):
