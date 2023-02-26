@@ -9,6 +9,7 @@ apt install -y python3 git python3-pip
 update-alternatives --install /usr/bin/python python $(which python2) 1
 update-alternatives --install /usr/bin/python python $(which python3) 2
 apt update
+pip3 install --upgrade setuptools
 pip3 install Jetson.GPIO
 groupadd -f -r gpio
 usermod -a -G gpio mcqueen
