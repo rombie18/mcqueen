@@ -28,7 +28,7 @@ Please follow the steps below to install the software on your Jetson Nano.
    `git clone https://github.com/rombie18/mcqueen`
 2. Run the installation script[^1] (with root permissions):  
    `cd mcqueen`  
-   `sudo bash ./install.sh`
+   `sudo -H bash ./install.sh`
 3. All done!
 
 ## Running the software

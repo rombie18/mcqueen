@@ -1,5 +1,3 @@
-board
-busio
 simple_pid
 rotaryio
 adafruit_bno055

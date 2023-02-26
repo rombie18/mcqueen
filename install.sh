@@ -5,7 +5,7 @@ apt update
 apt install nano
 
 # Install CircuitPython
-apt install -y python3 git python3-pip
+apt install -y python3 python3-pip
 update-alternatives --install /usr/bin/python python $(which python2) 1
 update-alternatives --install /usr/bin/python python $(which python3) 2
 apt update
