@@ -1,5 +1,4 @@
 board
-time
 busio
 simple_pid
 rotaryio
