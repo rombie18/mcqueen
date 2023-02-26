@@ -3,13 +3,11 @@ Description=McQueen service
 After=network.target
 After=systemd-user-sessions.service
 After=network-online.target
-StartLimitBurst=5
 
 [Service]
-ExecStart=/home/mcqueen/mcqueen-service.sh
+ExecStart=/home/mcqueen/mcqueen/mcqueen-service.sh
 Type=simple
 Restart=on-failure
-RestartSec=1s
 
 [Install]
 WantedBy=multi-user.target
