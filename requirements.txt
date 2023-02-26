@@ -6,3 +6,4 @@ rotaryio
 adafruit_bno055
 adafruit_pca9685
 adafruit_motor
+pyjoystick
