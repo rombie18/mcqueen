@@ -122,26 +122,28 @@ class McQueen:
         print()
         print("## SERVO ##")
         print("Full left")
-        self.actuator_motor.throttle = 0.2
+        self.actuator_servo.angle = 0
         time.sleep(1)
         print("Full right")
-        self.actuator_motor.throttle = -0.2
+        self.actuator_servo.angle = 180
         time.sleep(1)
         print("Center")
-        self.actuator_motor.throttle = 0
+        self.actuator_servo.angle = 90
+        time.sleep(10)
         print()
 
     def test_motor(self):
         print()
         print("## MOTOR ##")
         print("Forwards")
-        self.actuator_servo.angle = 0
+        self.actuator_motor.throttle = 0.2
         time.sleep(1)
         print("Backwards")
-        self.actuator_servo.angle = 180
+        self.actuator_motor.throttle = -0.2
         time.sleep(1)
         print("Stop")
-        self.actuator_servo.angle = 90
+        self.actuator_motor.throttle = 0
+        time.sleep(1)
         print()
 
 mcqueen = McQueen()
