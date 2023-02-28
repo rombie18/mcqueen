@@ -6,8 +6,8 @@ from simple_pid import PID
 from busio import I2C
 #from rotaryio import IncrementalEncoder
 from adafruit_bno055 import BNO055_I2C
-from adafruit-circuitpython-pca9685 import PCA9685
-from adafruit-circuitpython-motor import servo as MOTOR
+from adafruit_pca9685 import PCA9685
+from adafruit_motor import servo as MOTOR
 
 class McQueen:
     ## Main methods
