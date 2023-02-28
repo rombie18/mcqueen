@@ -1,5 +1,5 @@
 simple_pid
 adafruit_bno055
 adafruit_pca9685
-adafruit_motor
+adafruit-circuitpython-motor
 pyjoystick
