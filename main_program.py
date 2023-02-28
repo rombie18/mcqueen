@@ -6,8 +6,8 @@ from simple_pid import PID
 from busio import I2C
 #from rotaryio import IncrementalEncoder
 from adafruit_bno055 import BNO055_I2C
-from adafruit_pca9685 import PCA9685
-from adafruit_motor import servo as MOTOR
+from adafruit-circuitpython-pca9685 import PCA9685
+from adafruit-circuitpython-motor import servo as MOTOR
 
 class McQueen:
     ## Main methods
@@ -48,9 +48,10 @@ class McQueen:
         self.motor_pid.output_limits = (0, 0.15)
         self.motor_pid.sample_time = 0.01
 
-        print("Starting main loop...")
         try:
-            self.main_loop()
+            self.test_servo()
+            #print("Starting main loop...")
+            #self.main_loop()
         except:
             self.safe_stop()
 
@@ -117,17 +118,30 @@ class McQueen:
         print("Position: {}".format(self.sensor_encoder.position))
         print()
 
+    def test_servo(self):
+        print()
+        print("## SERVO ##")
+        print("Full left")
+        self.actuator_motor.throttle = 0.2
+        time.sleep(1)
+        print("Full right")
+        self.actuator_motor.throttle = -0.2
+        time.sleep(1)
+        print("Center")
+        self.actuator_motor.throttle = 0
+        print()
+
     def test_motor(self):
         print()
         print("## MOTOR ##")
         print("Forwards")
-        self.actuator_motor.throttle = 0.2
+        self.actuator_servo.angle = 0
         time.sleep(1)
         print("Backwards")
-        self.actuator_motor.throttle = -0.2
+        self.actuator_servo.angle = 180
         time.sleep(1)
         print("Stop")
-        self.actuator_motor.throttle = 0
+        self.actuator_servo.angle = 90
         print()
 
 mcqueen = McQueen()
