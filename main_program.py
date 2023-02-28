@@ -55,9 +55,9 @@ class McQueen:
             print("Starting main loop...")
             self.main_loop()
         except Exception as e:
-            print("-----------------------")
+            print("-----------ERROR-----------")
             print(e)
-            print("-----------------------")
+            print("------------END------------")
             self.safe_stop()
 
     def main_loop(self):
@@ -65,7 +65,7 @@ class McQueen:
             print("Velocity: {}, Heading: {}".format(self.velocity, self.heading))
             print("----")
             print("Measured velocity: {}".format(self.velocity))
-            print("Requested velocity: {}".format(self.actuator_motor.setpoint))
+            print("Requested velocity: {}".format(self.motor_pid.setpoint))
             print("Controlled throttle: {}".format(self.actuator_motor.throttle))
             print("----")
             print("Measured heading: {}".format(self.heading))
