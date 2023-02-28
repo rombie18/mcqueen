@@ -45,14 +45,15 @@ class McQueen:
         self.servo_pid.output_limits = (0, 180)
         self.servo_pid.error_map = self.transform_heading_to_angle
         self.servo_pid.sample_time = 0.01
+        # Max safe speed = 0.3,  Slow = 0.1,  AVG = 0.2
         self.motor_pid = PID(1, 0.1, 0.05, setpoint=0.5)
-        self.motor_pid.output_limits = (0, 0.15)
+        self.motor_pid.output_limits = (0, 0.0)
         self.motor_pid.sample_time = 0.01
 
         try:
-            self.test_servo()
-            #print("Starting main loop...")
-            #self.main_loop()
+            #self.test_servo()
+            print("Starting main loop...")
+            self.main_loop()
         except:
             self.safe_stop()
 
