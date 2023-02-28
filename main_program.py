@@ -54,7 +54,10 @@ class McQueen:
             #self.test_servo()
             print("Starting main loop...")
             self.main_loop()
-        except:
+        except Exception as e:
+            print("-----------------------")
+            print(e)
+            print("-----------------------")
             self.safe_stop()
 
     def main_loop(self):
