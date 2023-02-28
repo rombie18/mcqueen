@@ -26,3 +26,6 @@ cp mcqueen.service /etc/systemd/system/mcqueen.service
 systemctl daemon-reload
 systemctl enable mcqueen.service
 systemctl start mcqueen.service
+
+# Disable wifi power saving
+iw dev wlan0 set power_save off
