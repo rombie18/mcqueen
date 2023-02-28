@@ -85,9 +85,7 @@ class McQueen:
         self.actuator_servo.angle = self.servo_pid(self.heading)
 
     def calculate_velocity(self):
-        # TODO
-        if self.velocity < 1:
-            self.velocity = self.velocity + 0.005
+        self.velocity += self.sensor_imu.linear_acceleration[0] / 0.1
 
     def calculate_heading(self):
         self.heading = self.sensor_imu.euler[0]
