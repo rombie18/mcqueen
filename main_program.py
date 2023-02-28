@@ -49,7 +49,7 @@ class McQueen:
         self.servo_pid.sample_time = 0.1
         # Max safe speed = 0.3,  Slow = 0.1,  AVG = 0.2
         self.motor_pid = PID(1, 0.1, 0.05, setpoint=0.5)
-        self.motor_pid.output_limits = (0, 0.0)
+        self.motor_pid.output_limits = (0, 0.1)
         self.motor_pid.sample_time = 0.1
 
         try:
@@ -97,7 +97,7 @@ class McQueen:
             self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.heading))))
 
     def calculate_velocity(self):
-        self.velocity += 0.01
+        self.velocity = 0
 
     def calculate_heading(self):
         self.heading = self.sensor_imu.euler[0]
