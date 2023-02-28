@@ -43,6 +43,7 @@ class McQueen:
         print("Initialising controllers...")
         self.servo_pid = PID(1, 0.1, 0.05, setpoint=90)
         self.servo_pid.output_limits = (0, 180)
+        self.servo_pid.error_map = self.transform_heading_to_angle
         self.servo_pid.sample_time = 0.01
         self.motor_pid = PID(1, 0.1, 0.05, setpoint=0.5)
         self.motor_pid.output_limits = (0, 0.15)
@@ -58,6 +59,11 @@ class McQueen:
     def main_loop(self):
         while True:
             print("Velocity: {}, Heading: {}".format(self.velocity, self.heading))
+            print("----")
+            print("Measured angle: {}".format(self.transform_heading_to_angle(self.heading)))
+            print("Requested angle: {}".format(self.servo_pid.setpoint))
+            print("Controlled angle: {}".format(self.actuator_servo.angle))
+            print("----")
             self.calculate_velocity()
             self.calculate_heading()
             self.cycle_loop_motor()
@@ -75,7 +81,7 @@ class McQueen:
         self.actuator_motor.throttle = self.motor_pid(self.velocity)
 
     def cycle_loop_steering(self):
-        self.actuator_servo.angle = self.servo_pid(self.transform_heading_to_angle(self.heading))
+        self.actuator_servo.angle = self.servo_pid(self.heading)
 
     def calculate_velocity(self):
         # TODO
