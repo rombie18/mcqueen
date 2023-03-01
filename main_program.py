@@ -46,7 +46,7 @@ class McQueen:
         print("Initialising controllers...")
         self.servo_pid = PID(2, 0, 0, setpoint=0)
         self.servo_pid.output_limits = (-90, 90)
-        self.servo_pid.sample_time = 0.1
+        self.servo_pid.sample_time = 0.5
         # Max safe speed = 0.3,  Slow = 0.1,  AVG = 0.2
         self.motor_pid = PID(1, 0.1, 0.05, setpoint=0.5)
         self.motor_pid.output_limits = (0, 0.0)
