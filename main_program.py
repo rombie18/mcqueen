@@ -37,23 +37,23 @@ class McQueen:
         # Steering servo rc car, T: 20.08ms, PW: (920µs to 2120µs) -> (1320µs to 1720µs) to limit dragging against axis
         # angle 0 =~ 15° right, angle 180 =~ 15° left
         self.actuator_servo = MOTOR.Servo(
-            pwmdriver.channels[0], min_pulse=1320, max_pulse=1720)
+            pwmdriver.channels[0], min_pulse=1220, max_pulse=1820)
         # Motor ESC rc car, T: 20.08ms, PW: (1000µs to 2000µs)
         self.actuator_motor = MOTOR.ContinuousServo(
             pwmdriver.channels[1], min_pulse=1000, max_pulse=2000)
 
         # Controllers
         print("Initialising controllers...")
-        self.servo_pid = PID(2, 0, 0, setpoint=0)
+        self.servo_pid = PID(9, 10, 0, setpoint=0)
         self.servo_pid.output_limits = (-90, 90)
-        self.servo_pid.sample_time = 0.5
+        self.servo_pid.sample_time = 0.1
         # Max safe speed = 0.3,  Slow = 0.1,  AVG = 0.2
-        self.motor_pid = PID(1, 0.1, 0.05, setpoint=0.5)
-        self.motor_pid.output_limits = (0, 0.0)
+        self.motor_pid = PID(1, 0, 0, setpoint=0.15)
+        self.motor_pid.output_limits = (0, 0.15)
         self.motor_pid.sample_time = 0.1
 
         try:
-            # self.test_servo()
+            #self.test_servo()
             print("Starting main loop...")
             self.main_loop()
         except Exception as e:
@@ -66,14 +66,14 @@ class McQueen:
 
     def main_loop(self):
         while True:
-            print("Velocity: {}, Heading: {}".format(
-                self.velocity, self.heading))
-            print("----")
-            print("Measured velocity: {}".format(self.velocity))
-            print("Requested velocity: {}".format(self.motor_pid.setpoint))
-            print("Controlled throttle: {}".format(
-                self.actuator_motor.throttle))
-            print("----")
+            # print("Velocity: {}, Heading: {}".format(
+            #     self.velocity, self.heading))
+            # print("----")
+            # print("Measured velocity: {}".format(self.velocity))
+            # print("Requested velocity: {}".format(self.motor_pid.setpoint))
+            # print("Controlled throttle: {}".format(
+            #     self.actuator_motor.throttle))
+            # print("----")
             print("Measured heading: {}".format(self.heading))
             print("Requested heading: {}".format(self.servo_pid.setpoint))
             print("Controlled angle: {}".format(self.actuator_servo.angle))
@@ -90,7 +90,8 @@ class McQueen:
     # Control loops
 
     def cycle_loop_motor(self):
-        self.actuator_motor.throttle = self.motor_pid(self.velocity)
+        #self.actuator_motor.throttle = self.motor_pid(self.velocity)
+        self.actuator_motor.throttle = 0.15
 
     def cycle_loop_steering(self):
         self.actuator_servo.angle = self.transform_centerangle_to_angle(self.servo_pid(
@@ -146,10 +147,10 @@ class McQueen:
         print("## SERVO ##")
         print("Full left")
         self.actuator_servo.angle = 0
-        time.sleep(1)
+        time.sleep(10)
         print("Full right")
         self.actuator_servo.angle = 180
-        time.sleep(1)
+        time.sleep(10)
         print("Center")
         self.actuator_servo.angle = 90
         time.sleep(10)
