@@ -44,7 +44,7 @@ class McQueen:
 
         # Controllers
         print("Initialising controllers...")
-        self.servo_pid = PID(9, 10, 0, setpoint=0)
+        self.servo_pid = PID(3.5, 6, 0.5, setpoint=self.transform_angle_to_centerangle(self.transform_heading_to_angle(45)))
         self.servo_pid.output_limits = (-90, 90)
         self.servo_pid.sample_time = 0.1
         # Max safe speed = 0.3,  Slow = 0.1,  AVG = 0.2
@@ -53,9 +53,9 @@ class McQueen:
         self.motor_pid.sample_time = 0.1
 
         try:
-            #self.test_servo()
+            self.test_motor()
             print("Starting main loop...")
-            self.main_loop()
+            #self.main_loop()
         except Exception as e:
             print("-----------ERROR-----------")
             print(e)
@@ -66,18 +66,6 @@ class McQueen:
 
     def main_loop(self):
         while True:
-            # print("Velocity: {}, Heading: {}".format(
-            #     self.velocity, self.heading))
-            # print("----")
-            # print("Measured velocity: {}".format(self.velocity))
-            # print("Requested velocity: {}".format(self.motor_pid.setpoint))
-            # print("Controlled throttle: {}".format(
-            #     self.actuator_motor.throttle))
-            # print("----")
-            print("Measured heading: {}".format(self.heading))
-            print("Requested heading: {}".format(self.servo_pid.setpoint))
-            print("Controlled angle: {}".format(self.actuator_servo.angle))
-            print("----")
             self.calculate_velocity()
             self.calculate_heading()
             self.cycle_loop_motor()
@@ -85,20 +73,21 @@ class McQueen:
 
     def safe_stop(self):
         self.actuator_motor.throttle = 0
-        self.actuator_servo.angle = 90
+        self.actuator_servo.angle = self.transform_heading_to_angle(0)
 
     # Control loops
 
     def cycle_loop_motor(self):
         #self.actuator_motor.throttle = self.motor_pid(self.velocity)
-        self.actuator_motor.throttle = 0.15
+        self.actuator_motor.throttle = 0.3
 
     def cycle_loop_steering(self):
         self.actuator_servo.angle = self.transform_centerangle_to_angle(self.servo_pid(
             self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.heading))))
 
     def calculate_velocity(self):
-        self.velocity = 0
+        if self.motor_pid.setpoint < self.velocity:
+            self.velocity = self.velocity + 0.00001
 
     def calculate_heading(self):
         self.heading = self.sensor_imu.euler[0]
@@ -121,54 +110,6 @@ class McQueen:
 
     def transform_centerangle_to_angle(self, centerangle):
         return centerangle + 90
-
-    # Test functions
-    def test_imu(self):
-        print()
-        print("## IMU ##")
-        print("Temperature: {} degrees C".format(self.sensor_imu.temperature))
-        print("Accelerometer (m/s^2): {}".format(self.sensor_imu.acceleration))
-        print("Magnetometer (microteslas): {}".format(self.sensor_imu.magnetic))
-        print("Gyroscope (rad/sec): {}".format(self.sensor_imu.gyro))
-        print("Euler angle: {}".format(self.sensor_imu.euler))
-        print("Quaternion: {}".format(self.sensor_imu.quaternion))
-        print("Linear acceleration (m/s^2): {}".format(self.sensor_imu.linear_acceleration))
-        print("Gravity (m/s^2): {}".format(self.sensor_imu.gravity))
-        print()
-
-    def test_encoder(self):
-        print()
-        print("## ENCODER ##")
-        print("Position: {}".format(self.sensor_encoder.position))
-        print()
-
-    def test_servo(self):
-        print()
-        print("## SERVO ##")
-        print("Full left")
-        self.actuator_servo.angle = 0
-        time.sleep(10)
-        print("Full right")
-        self.actuator_servo.angle = 180
-        time.sleep(10)
-        print("Center")
-        self.actuator_servo.angle = 90
-        time.sleep(10)
-        print()
-
-    def test_motor(self):
-        print()
-        print("## MOTOR ##")
-        print("Forwards")
-        self.actuator_motor.throttle = 0.2
-        time.sleep(1)
-        print("Backwards")
-        self.actuator_motor.throttle = -0.2
-        time.sleep(1)
-        print("Stop")
-        self.actuator_motor.throttle = 0
-        time.sleep(1)
-        print()
 
 
 mcqueen = McQueen()
