@@ -139,17 +139,17 @@ class McQueen:
                 # Throttle
                 self.actuator_motor.thottle = key.raw_value
 
-            if key.keytype == "Button" and key.number == 4:
+            if key.keytype == "Button" and key.number == 4 and key.raw_value == 1:
                 # Pink square button
                 # Change mode
                 self.pid_control = not self.pid_control
 
-            if key.keytype == "Button" and key.number == 2:
+            if key.keytype == "Button" and key.number == 2 and key.raw_value == 1:
                 # Red circle button
                 # Safe stop
                 self.stop = True
 
-            if key.keytype == "Button" and key.number == 3:
+            if key.keytype == "Button" and key.number == 3 and key.raw_value == 1:
                 # Green triangle button
                 # Start
                 print("Start")
@@ -165,11 +165,8 @@ class McQueen:
                 # Decrease speed limit
                 self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] - 0.05)
         except Exception as e:
-            print("-----------ERROR-----------")
+            print("-----------CONTORLLER ERROR-----------")
             print(e)
             print("------------END------------")
-        finally:
-            print("Handling safe stop...")
-            self.safe_stop()
 
 mcqueen = McQueen()
