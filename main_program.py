@@ -128,41 +128,48 @@ class McQueen:
         self.stop = True
 
     def controller_process(self, key):
-        if key.keytype == "Axis" and key.number == 2:
-            # Right joystick, left - right
-            # Steering
-            self.actuator_servo.angle = key.raw_value * 90 + 90
+        try:
+            if key.keytype == "Axis" and key.number == 2:
+                # Right joystick, left - right
+                # Steering
+                self.actuator_servo.angle = key.raw_value * 90 + 90
 
-        if key.keytype == "Axis" and key.number == 4:
-            # Right trigger button
-            # Throttle
-            self.actuator_motor.thottle = key.raw_value
+            if key.keytype == "Axis" and key.number == 4:
+                # Right trigger button
+                # Throttle
+                self.actuator_motor.thottle = key.raw_value
 
-        if key.keytype == "Button" and key.number == 1:
-            # Pink square button
-            # Change mode
-            self.pid_control = not self.pid_control
+            if key.keytype == "Button" and key.number == 4:
+                # Pink square button
+                # Change mode
+                self.pid_control = not self.pid_control
 
-        if key.keytype == "Button" and key.number == 2:
-            # Red circle button
-            # Safe stop
-            self.stop = True
+            if key.keytype == "Button" and key.number == 2:
+                # Red circle button
+                # Safe stop
+                self.stop = True
 
-        if key.keytype == "Button" and key.number == 3:
-            # Green triangle button
-            # Start
-            print("Start")
-            print(vars(key))
+            if key.keytype == "Button" and key.number == 3:
+                # Green triangle button
+                # Start
+                print("Start")
+                print(vars(key))
 
-        if key.keytype == "Hat" and key.number == 0 and key.raw_value == 1:
-            # Left hat up
-            # Increase speed limit
-            self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] + 0.05)
+            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 1:
+                # Left hat up
+                # Increase speed limit
+                self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] + 0.05)
 
-        if key.keytype == "Hat" and key.number == 0 and key.raw_value == 4:
-            # Left hat down
-            # Decrease speed limit
-            self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] - 0.05)
-
+            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 4:
+                # Left hat down
+                # Decrease speed limit
+                self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] - 0.05)
+        except Exception as e:
+            print("-----------ERROR-----------")
+            print(e)
+            print("------------END------------")
+        finally:
+            print("Handling safe stop...")
+            self.safe_stop()
 
 mcqueen = McQueen()
