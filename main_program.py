@@ -133,7 +133,7 @@ class McQueen:
             if key.keytype == "Axis" and key.number == 2:
                 # Right joystick, left - right
                 # Steering
-                self.actuator_servo.angle = key.raw_value * 90 + 90
+                self.actuator_servo.angle = -key.raw_value * 90 + 90
 
             if key.keytype == "Axis" and key.number == 4:
                 # Right trigger button
@@ -172,12 +172,14 @@ class McQueen:
                 self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] - 0.05)
 
             if key.keytype == "Hat" and key.number == 0 and key.raw_value == 0:
+                print(vars(key))
                 # Left hat left
                 # Decrease PID heading
                 self.set_heading = self.set_heading + 5
                 self.servo_pid.setpoint = self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading))
 
             if key.keytype == "Hat" and key.number == 0 and key.raw_value == 3:
+                print(vars(key))
                 # Left hat right
                 # Increase PID heading
                 self.set_heading = self.set_heading - 5
@@ -186,6 +188,6 @@ class McQueen:
         except Exception as e:
             print("-----------CONTORLLER ERROR-----------")
             print(e)
-            print("------------END------------")
+            print("-----------------CEND-----------------")
 
 mcqueen = McQueen()
