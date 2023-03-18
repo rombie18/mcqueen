@@ -74,8 +74,9 @@ class McQueen:
         while not self.stop:
             self.calculate_velocity()
             self.calculate_heading()
-            self.cycle_loop_motor()
-            self.cycle_loop_steering()
+            if self.pid_control:
+                self.cycle_loop_motor()
+                self.cycle_loop_steering()
 
     def safe_stop(self):
         self.actuator_motor.throttle = 0
@@ -136,11 +137,10 @@ class McQueen:
             # Throttle
             self.actuator_motor.thottle = key.raw_value
 
-        if key.keytype == "Button" and key.number == 2:
+        if key.keytype == "Button" and key.number == 1:
             # Pink square button
             # Change mode
-            print("Change to PID control")
-            print(vars(key))
+            self.pid_control = not self.pid_control
 
         if key.keytype == "Button" and key.number == 2:
             # Red circle button
