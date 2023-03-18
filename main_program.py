@@ -8,6 +8,7 @@ from busio import I2C
 from adafruit_bno055 import BNO055_I2C
 from adafruit_pca9685 import PCA9685
 from adafruit_motor import servo as MOTOR
+from pyjoystick.sdl2 import Key, Joystick, run_event_loop
 
 
 class McQueen:
@@ -16,6 +17,7 @@ class McQueen:
         # Variables
         self.velocity = 0
         self.heading = 0
+        self.stop = False
 
         # Busses
         print("Initialising busses...")
@@ -64,7 +66,8 @@ class McQueen:
             self.safe_stop()
 
     def main_loop(self):
-        while True:
+        run_event_loop(self.controller_add, self.controller_remove, self.controller_process)
+        while not self.stop:
             self.calculate_velocity()
             self.calculate_heading()
             self.cycle_loop_motor()
@@ -109,6 +112,52 @@ class McQueen:
 
     def transform_centerangle_to_angle(self, centerangle):
         return centerangle + 90
+
+    # Controller functions
+    def controller_add(self, joy):
+        print('Controller connected', joy)
+
+    def controller_remove(self, joy):
+        print('Controller disconnected', joy)
+        # Robot sould stop here or at least continue in a very slow safe mode
+
+    def controller_process(self, key):
+        if key.keytype == "Axis" and key.number == 2:
+            # Right joystick, left - right
+            # Steering
+            self.actuator_servo.angle = key.raw_value * 90 + 90
+
+        if key.keytype == "Axis" and key.number == 4:
+            # Right trigger button
+            # Throttle
+            self.actuator_motor.thottle = key.raw_value
+
+        if key.keytype == "Button" and key.number == 2:
+            # Pink square button
+            # Change mode
+            print("Change to PID control")
+            print(vars(key))
+
+        if key.keytype == "Button" and key.number == 2:
+            # Red circle button
+            # Safe stop
+            self.stop = True
+
+        if key.keytype == "Button" and key.number == 3:
+            # Green triangle button
+            # Start
+            print("Start")
+            print(vars(key))
+
+        if key.keytype == "Hat" and key.number == 0 and key.raw_value == 1:
+            # Left hat up
+            # Increase speed limit
+            self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] + 0.05)
+
+        if key.keytype == "Hat" and key.number == 0 and key.raw_value == 4:
+            # Left hat down
+            # Decrease speed limit
+            self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] - 0.05)
 
 
 mcqueen = McQueen()
