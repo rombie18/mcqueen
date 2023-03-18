@@ -53,9 +53,8 @@ class McQueen:
         self.motor_pid.sample_time = 0.1
 
         try:
-            self.test_motor()
             print("Starting main loop...")
-            #self.main_loop()
+            self.main_loop()
         except Exception as e:
             print("-----------ERROR-----------")
             print(e)
