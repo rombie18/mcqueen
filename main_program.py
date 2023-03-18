@@ -139,7 +139,7 @@ class McQueen:
                 # Throttle
                 self.actuator_motor.thottle = key.raw_value
 
-            if key.keytype == "Button" and key.number == 4 and key.raw_value == 1:
+            if key.keytype == "Button" and key.number == 0 and key.raw_value == 1:
                 # Pink square button
                 # Change mode
                 print("PID control mode:", self.pid_control)
