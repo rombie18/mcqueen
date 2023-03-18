@@ -19,6 +19,7 @@ class McQueen:
         self.velocity = 0
         self.heading = 0
         self.stop = False
+        self.pid_control = False
 
         # Busses
         print("Initialising busses...")
