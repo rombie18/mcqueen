@@ -142,7 +142,12 @@ class McQueen:
             if key.keytype == "Button" and key.number == 0 and key.raw_value == 1:
                 # Pink square button
                 # Change mode
-                self.pid_control = not self.pid_control
+                if self.pid_control:
+                    self.pid_control = False
+                    self.actuator_motor.throttle = 90
+                    self.actuator_servo.angle = 0
+                else:
+                    self.pid_control = True
                 print("PID control mode:", self.pid_control)
 
             if key.keytype == "Button" and key.number == 2 and key.raw_value == 1:
