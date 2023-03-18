@@ -51,8 +51,8 @@ class McQueen:
         self.servo_pid.output_limits = (-90, 90)
         self.servo_pid.sample_time = 0.1
         # Max safe speed = 0.3,  Slow = 0.1,  AVG = 0.2
-        self.motor_pid = PID(1, 0, 0, setpoint=0.15)
-        self.motor_pid.output_limits = (0, 0.15)
+        self.motor_pid = PID(1, 0, 0, setpoint=0.1)
+        self.motor_pid.output_limits = (0, 0.1)
         self.motor_pid.sample_time = 0.1
 
         try:
@@ -84,8 +84,7 @@ class McQueen:
     # Control loops
 
     def cycle_loop_motor(self):
-        #self.actuator_motor.throttle = self.motor_pid(self.velocity)
-        self.actuator_motor.throttle = 0.3
+        self.actuator_motor.throttle = self.motor_pid(self.velocity)
 
     def cycle_loop_steering(self):
         self.actuator_servo.angle = self.transform_centerangle_to_angle(self.servo_pid(
@@ -119,11 +118,12 @@ class McQueen:
 
     # Controller functions
     def controller_add(self, joy):
-        print('Controller connected', joy)
+        print('Controller connected:', joy)
 
     def controller_remove(self, joy):
-        print('Controller disconnected', joy)
+        print('Controller disconnected:', joy)
         # Robot sould stop here or at least continue in a very slow safe mode
+        self.stop = True
 
     def controller_process(self, key):
         if key.keytype == "Axis" and key.number == 2:
