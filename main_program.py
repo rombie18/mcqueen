@@ -20,6 +20,7 @@ class McQueen:
         self.heading = 0
         self.stop = False
         self.pid_control = False
+        self.set_heading = 0
 
         # Busses
         print("Initialising busses...")
@@ -48,7 +49,7 @@ class McQueen:
 
         # Controllers
         print("Initialising controllers...")
-        self.servo_pid = PID(3.5, 6, 0.5, setpoint=self.transform_angle_to_centerangle(self.transform_heading_to_angle(45)))
+        self.servo_pid = PID(3.5, 6, 0.5, setpoint=self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading)))
         self.servo_pid.output_limits = (-90, 90)
         self.servo_pid.sample_time = 0.1
         # Max safe speed = 0.3,  Slow = 0.1,  AVG = 0.2
@@ -169,6 +170,19 @@ class McQueen:
                 # Left hat down
                 # Decrease speed limit
                 self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] - 0.05)
+
+            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 0:
+                # Left hat left
+                # Decrease PID heading
+                self.set_heading = self.set_heading + 5
+                self.servo_pid.setpoint = self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading))
+
+            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 3:
+                # Left hat right
+                # Increase PID heading
+                self.set_heading = self.set_heading - 5
+                self.servo_pid.setpoint = self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading))
+
         except Exception as e:
             print("-----------CONTORLLER ERROR-----------")
             print(e)
