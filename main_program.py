@@ -8,8 +8,9 @@ from busio import I2C
 from adafruit_bno055 import BNO055_I2C
 from adafruit_pca9685 import PCA9685
 from adafruit_motor import servo as MOTOR
-from pyjoystick.sdl2 import Key, Joystick, run_event_loop
 
+import pyjoystick
+from pyjoystick.sdl2 import Key, Joystick, run_event_loop
 
 class McQueen:
     # Main methods
@@ -66,8 +67,10 @@ class McQueen:
             self.safe_stop()
 
     def main_loop(self):
-        run_event_loop(self.controller_add, self.controller_remove, self.controller_process)
-        print("ooook")
+
+        mngr = pyjoystick.ThreadEventManager(event_loop=run_event_loop, add_joystick=self.controller_add, remove_joystick=self.controller_remove, handle_key_event=self.controller_process)
+        mngr.start()
+
         while not self.stop:
             self.calculate_velocity()
             self.calculate_heading()
