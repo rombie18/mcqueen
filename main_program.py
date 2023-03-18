@@ -67,6 +67,7 @@ class McQueen:
 
     def main_loop(self):
         run_event_loop(self.controller_add, self.controller_remove, self.controller_process)
+        print("ooook")
         while not self.stop:
             self.calculate_velocity()
             self.calculate_heading()
