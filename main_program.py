@@ -137,7 +137,7 @@ class McQueen:
             if key.keytype == "Axis" and key.number == 4:
                 # Right trigger button
                 # Throttle
-                self.actuator_motor.thottle = key.raw_value
+                self.actuator_motor.throttle = key.raw_value
 
             if key.keytype == "Button" and key.number == 0 and key.raw_value == 1:
                 # Pink square button
