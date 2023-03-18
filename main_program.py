@@ -171,7 +171,7 @@ class McQueen:
                 # Decrease speed limit
                 self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] - 0.05)
 
-            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 5:
+            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 8:
                 print(vars(key))
                 # Left hat left
                 # Decrease PID heading
