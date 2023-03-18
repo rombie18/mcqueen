@@ -142,6 +142,7 @@ class McQueen:
             if key.keytype == "Button" and key.number == 4 and key.raw_value == 1:
                 # Pink square button
                 # Change mode
+                print("PID control mode:", self.pid_control)
                 self.pid_control = not self.pid_control
 
             if key.keytype == "Button" and key.number == 2 and key.raw_value == 1:
@@ -153,7 +154,6 @@ class McQueen:
                 # Green triangle button
                 # Start
                 print("Start")
-                print(vars(key))
 
             if key.keytype == "Hat" and key.number == 0 and key.raw_value == 1:
                 # Left hat up
