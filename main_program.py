@@ -145,8 +145,8 @@ class McQueen:
                 # Change mode
                 if self.pid_control:
                     self.pid_control = False
-                    self.actuator_motor.throttle = 90
-                    self.actuator_servo.angle = 0
+                    self.actuator_motor.throttle = 0
+                    self.actuator_servo.angle = 90
                 else:
                     self.pid_control = True
                 print("PID control mode:", self.pid_control)
@@ -178,7 +178,7 @@ class McQueen:
                 self.set_heading = self.set_heading + 5
                 self.servo_pid.setpoint = self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading))
 
-            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 3:
+            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 2:
                 print(vars(key))
                 # Left hat right
                 # Increase PID heading
