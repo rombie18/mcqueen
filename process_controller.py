@@ -8,8 +8,6 @@ def print_remove(joy):
     # Robot sould stop here or at least continue in a very slow safe mode
 
 def key_received(key):
-
-    if key.keytype != "Axis":
-        print(vars(key))
+    print(vars(key))
 
 run_event_loop(print_add, print_remove, key_received)

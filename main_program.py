@@ -140,7 +140,7 @@ class McQueen:
 
     def controller_process(self, key):
         try:
-            if key.keytype == "Axis" and key.number == 1:
+            if key.keytype == "Axis" and key.number == 0:
                 # Left joystick, left - right
                 # Steering
                 self.actuator_servo.angle = -key.raw_value * 90 + 90
@@ -150,10 +150,10 @@ class McQueen:
                 # Throttle
                 self.actuator_motor.throttle = key.raw_value * self.motor_pid.output_limits[1]
 
-            if key.keytype == "Axis" and key.number == 0:
+            if key.keytype == "Axis" and key.number == 3:
                 # Right trigger button
                 # Throttle
-                self.actuator_motor.throttle = -key.raw_value * self.motor_pid.output_limits[1]
+                self.actuator_motor.throttle = -key.raw_value
 
             if key.keytype == "Button" and key.number == 0 and key.raw_value == 1:
                 # Pink square button
