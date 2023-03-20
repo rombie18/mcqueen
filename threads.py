@@ -46,7 +46,7 @@ class Mcqueen:
         self.stop_event = Event()
         self.startThreads()
 
-        print(self.sensor_imu)
+        print(vars(self.sensor_imu))
 
     def startThreads(self):
 
@@ -66,7 +66,7 @@ class Mcqueen:
                     writer.writerow(["to", "do"])
                     
         pipe_sensor_imu = deque()
-        thread_producer_sensor_imu = ProducerThread(pipe_sensor_imu, self.stop_event, 100, handle_produce_sensor_imu, self.sensor_imu)
+        thread_producer_sensor_imu = ProducerThread(pipe_sensor_imu, self.stop_event, 2, handle_produce_sensor_imu, self.sensor_imu)
         thread_reader_sensor_imu = ReaderThread(pipe_sensor_imu, self.stop_event, 1, handle_read_sensor_imu)
         thread_consumer_sensor_imu = ConsumerThread(pipe_sensor_imu, self.stop_event, 0.5, handle_consume_sensor_imu)
 
