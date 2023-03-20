@@ -7,6 +7,7 @@ import csv
 import board
 import time
 import math
+import logging
 
 from simple_pid import PID
 from busio import I2C
@@ -27,6 +28,7 @@ class Mcqueen:
     def __init__(self):
         # Variables
         self.heading = 0
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(message)s")
 
         # Busses
         print("Initialising busses...")
@@ -86,6 +88,7 @@ class ProducerThread(Thread):
         while not self.stop_event.is_set():
             value = self.handle_produce(self.sensor_imu)
             self.pipe.appendleft(value)
+            logging.debug("Produced: %d -> %s", value, str(deque))
             time.sleep(self.period - ((time.time() - starttime) % self.period))
  
 class ReaderThread(Thread):
@@ -100,6 +103,7 @@ class ReaderThread(Thread):
         starttime = time.time()
         while not self.stop_event.is_set() and len(self.pipe) > 0:
             self.handle_read(self.pipe[0])
+            logging.debug("Read: %d -> %s", value, str(deque))
             time.sleep(self.period - ((time.time() - starttime) % self.period))
 
 class ConsumerThread(Thread):
@@ -118,10 +122,13 @@ class ConsumerThread(Thread):
                 while len(self.pipe) > 10:
                     values.append(self.pipe.pop())
                 self.handle_consume(values)
+            logging.debug("Consumed: %s -> %s", values, str(deque))
             time.sleep(self.period - ((time.time() - starttime) % self.period))
         values = []
         while len(self.pipe) > 0:
             values.append(self.pipe.pop())
         self.handle_consume(values)
+        logging.debug("Consumed: %s -> %s", values, str(deque))
+
 
 mcQueen = Mcqueen()
