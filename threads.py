@@ -70,7 +70,7 @@ class Mcqueen:
         def handle_consume_sensor_imu(self, items):
             filename = "imu.csv"
             with open(self.path + "/" + filename, 'w') as file:
-                writer = csv.writer(file)
+                writer = csv.writer(file, delimiter="|")
                 writer.writerow(list(items[0].keys()))
                 for item in items:
                     
