@@ -50,8 +50,8 @@ class Mcqueen:
 
     def startThreads(self):
 
-        def handle_produce_sensor_imu():
-            return self.sensor_imu.euler[0]
+        def handle_produce_sensor_imu(object):
+            return object.euler[0]
 
         def handle_read_sensor_imu(value):
             print(value)
@@ -65,9 +65,9 @@ class Mcqueen:
                     writer.writerow(["to", "do"])
                     
         pipe_sensor_imu = deque()
-        thread_producer_sensor_imu = ProducerThread(pipe_sensor_imu, self.stop_event, 100, handle_produce=handle_produce_sensor_imu)
-        thread_reader_sensor_imu = ReaderThread(pipe_sensor_imu, self.stop_event, 1, handle_read=handle_read_sensor_imu)
-        thread_consumer_sensor_imu = ConsumerThread(pipe_sensor_imu, self.stop_event, 0.5, handle_consume=handle_consume_sensor_imu)
+        thread_producer_sensor_imu = ProducerThread(pipe_sensor_imu, self.stop_event, 100, handle_produce_sensor_imu, self.sensor_imu)
+        thread_reader_sensor_imu = ReaderThread(pipe_sensor_imu, self.stop_event, 1, handle_read_sensor_imu)
+        thread_consumer_sensor_imu = ConsumerThread(pipe_sensor_imu, self.stop_event, 0.5, handle_consume_sensor_imu)
 
         thread_producer_sensor_imu.start()
         thread_reader_sensor_imu.start()
@@ -75,17 +75,18 @@ class Mcqueen:
 
 
 class ProducerThread(Thread):
-    def __init__(self, pipe, stop_event, frequency, handle_produce):
+    def __init__(self, pipe, stop_event, frequency, handle_produce, sensor_imu):
         super(ProducerThread, self).__init__()
         self.pipe = pipe
         self.stop_event = stop_event
         self.period = 1 / frequency
         self.handle_produce = handle_produce
+        self.sensor_imu = sensor_imu
  
     def run(self):
         starttime = time.time()
         while not self.stop_event.is_set():
-            value = self.handle_produce()
+            value = self.handle_produce(self.sensor_imu)
             self.pipe.appendleft(value)
             time.sleep(self.period - ((time.time() - starttime) % self.period))
  
