@@ -47,13 +47,13 @@ class Mcqueen:
         self.startThreads()
 
         print("m" + str(vars(self.sensor_imu)))
-        print("m" + str(vars(self.sensor_imu.euler[0])))
+        print("m" + str(self.sensor_imu.euler[0]))
 
     def startThreads(self):
 
         def handle_produce_sensor_imu(object):
             print("t" + str(vars(object)))
-            print("t" + str(vars(object.euler[0])))
+            print("t" + str(object.euler[0]))
             return None
 
         def handle_read_sensor_imu(value):
