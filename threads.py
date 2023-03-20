@@ -46,11 +46,12 @@ class Mcqueen:
         self.stop_event = Event()
         self.startThreads()
 
-        print(self.sensor_imu.euler[0])
+        print(self.sensor_imu)
 
     def startThreads(self):
 
         def handle_produce_sensor_imu(object):
+            print(vars(object))
             return object.euler[0]
 
         def handle_read_sensor_imu(value):
@@ -86,8 +87,6 @@ class ProducerThread(Thread):
     def run(self):
         starttime = time.time()
         while not self.stop_event.is_set():
-            print(self.sensor_imu)
-            print(vars(self.sensor_imu))
             value = self.handle_produce(self.sensor_imu)
             self.pipe.appendleft(value)
             time.sleep(self.period - ((time.time() - starttime) % self.period))
