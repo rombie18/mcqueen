@@ -64,16 +64,17 @@ class Mcqueen:
                 'gravity': self.sensor_imu.gravity
             }
 
-        def handle_read_sensor_imu(self, value):
-            print(value)
+        def handle_read_sensor_imu(self, item):
+            print(item)
 
-        def handle_consume_sensor_imu(self, values):
+        def handle_consume_sensor_imu(self, items):
             filename = "imu.csv"
             with open(self.path + "/" + filename, 'w') as file:
                 writer = csv.writer(file)
-                writer.writerow(["to", "do"])
-                for value in values:
-                    writer.writerow(["to", "do"])
+                writer.writerow(list(items[0].keys()))
+                for item in items:
+                    
+                    writer.writerow(item.values())
 
         pipe_sensor_imu = deque()
         thread_producer_sensor_imu = ProducerThread(
