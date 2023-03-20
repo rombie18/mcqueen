@@ -72,13 +72,20 @@ class Mcqueen:
         def handle_read_sensor_imu(self, item):
             self.heading = item["euler"][0]
 
-        def handle_consume(self, items):
+        def handle_consume_sensor_imu(self, items):
             filename = "imu.csv"
             with open(self.path + "/" + filename, 'w') as file:
                 writer = csv.writer(file, delimiter="|")
                 writer.writerow(list(items[0].keys()))
                 for item in items:
+                    writer.writerow(item.values())
                     
+        def handle_consume_sensor_stats(self, items):
+            filename = "stats.csv"
+            with open(self.path + "/" + filename, 'w') as file:
+                writer = csv.writer(file, delimiter="|")
+                writer.writerow(list(items[0].keys()))
+                for item in items:
                     writer.writerow(item.values())
 
         pipe_sensor_imu = deque()
@@ -93,9 +100,9 @@ class Mcqueen:
             pipe_sensor_imu, self.stop_event, 10, handle_read_sensor_imu, self)
         
         thread_consumer_sensor_imu = ConsumerThread(
-            pipe_sensor_imu, self.stop_event, 0.1, handle_consume, self)
+            pipe_sensor_imu, self.stop_event, 0.1, handle_consume_sensor_imu, self)
         thread_consumer_sensor_stats = ConsumerThread(
-            pipe_sensor_stats, self.stop_event, 0.1, handle_consume, self)
+            pipe_sensor_stats, self.stop_event, 0.1, handle_consume_sensor_stats, self)
 
         thread_producer_sensor_imu.start()
         thread_producer_sensor_stats.start()
