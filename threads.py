@@ -51,7 +51,7 @@ class Mcqueen:
             return self.sensor_imu
 
         def handle_read_sensor_imu(value):
-            print(value)
+            print(vars(value))
             
         def handle_consume_sensor_imu(values):
             filename = "imu.csv"
