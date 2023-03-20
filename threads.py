@@ -41,7 +41,7 @@ class Mcqueen:
         self.sensor_imu = BNO055_I2C(bus_i2c_2)
 
         # Telemetry
-        self.path = "data/" + datetime.now().strftime("%s%m%Y %H:%M:%S")
+        self.path = "data/" + datetime.now().strftime("%d%m%Y %H:%M:%S")
         if not os.path.exists(self.path):
             os.makedirs(self.path)
 
@@ -63,11 +63,15 @@ class Mcqueen:
                 'linear_acceleration': self.sensor_imu.linear_acceleration,
                 'gravity': self.sensor_imu.gravity
             }
+            
+        def handle_produce_sensor_stats(self):
+            with jtop() as jetson:
+                print(jetson.stats)
 
         def handle_read_sensor_imu(self, item):
             self.heading = item["euler"][0]
 
-        def handle_consume_sensor_imu(self, items):
+        def handle_consume(self, items):
             filename = "imu.csv"
             with open(self.path + "/" + filename, 'w') as file:
                 writer = csv.writer(file, delimiter="|")
@@ -77,16 +81,28 @@ class Mcqueen:
                     writer.writerow(item.values())
 
         pipe_sensor_imu = deque()
+        pipe_sensor_stats = deque()
+        
         thread_producer_sensor_imu = ProducerThread(
             pipe_sensor_imu, self.stop_event, 100, handle_produce_sensor_imu, self)
+        thread_producer_sensor_stats = ProducerThread(
+            pipe_sensor_stats, self.stop_event, 1, handle_produce_sensor_stats, self)
+        
         thread_reader_sensor_imu = ReaderThread(
             pipe_sensor_imu, self.stop_event, 10, handle_read_sensor_imu, self)
+        
         thread_consumer_sensor_imu = ConsumerThread(
-            pipe_sensor_imu, self.stop_event, 0.1, handle_consume_sensor_imu, self)
+            pipe_sensor_imu, self.stop_event, 0.1, handle_consume, self)
+        thread_consumer_sensor_stats = ConsumerThread(
+            pipe_sensor_stats, self.stop_event, 0.1, handle_consume, self)
 
         thread_producer_sensor_imu.start()
+        thread_producer_sensor_stats.start()
+
         thread_reader_sensor_imu.start()
+        
         thread_consumer_sensor_imu.start()
+        thread_consumer_sensor_stats.start()
 
 
 class ProducerThread(Thread):
