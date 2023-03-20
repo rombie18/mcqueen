@@ -46,15 +46,15 @@ class Mcqueen:
         self.stop_event = Event()
         self.startThreads()
 
-        print(vars(self.sensor_imu))
-        print(vars(self.sensor_imu.euler[0]))
+        print("m" + vars(self.sensor_imu))
+        print("m" + vars(self.sensor_imu.euler[0]))
 
     def startThreads(self):
 
         def handle_produce_sensor_imu(object):
-            print(vars(object))
-            print(vars(object.euler[0]))
-            return object.euler[0]
+            print("t" + vars(object))
+            print("t" + vars(object.euler[0]))
+            return None
 
         def handle_read_sensor_imu(value):
             print(value)
