@@ -86,6 +86,8 @@ class ProducerThread(Thread):
     def run(self):
         starttime = time.time()
         while not self.stop_event.is_set():
+            print(self.sensor_imu)
+            print(vars(self.sensor_imu))
             value = self.handle_produce(self.sensor_imu)
             self.pipe.appendleft(value)
             time.sleep(self.period - ((time.time() - starttime) % self.period))
