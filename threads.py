@@ -101,9 +101,12 @@ class ReaderThread(Thread):
  
     def run(self):
         starttime = time.time()
-        while not self.stop_event.is_set() and len(self.pipe) > 0:
-            self.handle_read(self.pipe[0])
-            logging.debug("Read: %d -> %s", self.pipe[0], str(self.pipe))
+        while not self.stop_event.is_set():
+            if len(self.pipe) > 0:
+                self.handle_read(self.pipe[0])
+                logging.debug("Read: %d -> %s", self.pipe[0], str(self.pipe))
+            else:
+                logging.debug("Read: Empty pipe")
             time.sleep(self.period - ((time.time() - starttime) % self.period))
 
 class ConsumerThread(Thread):
