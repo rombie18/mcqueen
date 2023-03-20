@@ -29,7 +29,7 @@ class Mcqueen:
     def __init__(self):
         # Variables
         self.heading = 0
-        logging.basicConfig(level=logging.DEBUG,
+        logging.basicConfig(level=logging.INFO,
                             format="%(asctime)s - %(message)s")
 
         # Busses
@@ -65,7 +65,7 @@ class Mcqueen:
             }
 
         def handle_read_sensor_imu(self, item):
-            print(item)
+            self.heading = item["euler"][0]
 
         def handle_consume_sensor_imu(self, items):
             filename = "imu.csv"
@@ -78,11 +78,11 @@ class Mcqueen:
 
         pipe_sensor_imu = deque()
         thread_producer_sensor_imu = ProducerThread(
-            pipe_sensor_imu, self.stop_event, 2, handle_produce_sensor_imu, self)
+            pipe_sensor_imu, self.stop_event, 100, handle_produce_sensor_imu, self)
         thread_reader_sensor_imu = ReaderThread(
-            pipe_sensor_imu, self.stop_event, 1, handle_read_sensor_imu, self)
+            pipe_sensor_imu, self.stop_event, 10, handle_read_sensor_imu, self)
         thread_consumer_sensor_imu = ConsumerThread(
-            pipe_sensor_imu, self.stop_event, 0.5, handle_consume_sensor_imu, self)
+            pipe_sensor_imu, self.stop_event, 0.1, handle_consume_sensor_imu, self)
 
         thread_producer_sensor_imu.start()
         thread_reader_sensor_imu.start()
