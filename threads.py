@@ -39,7 +39,7 @@ class Mcqueen:
         self.sensor_imu = BNO055_I2C(bus_i2c_2)
 
         # Telemetry
-        self.path = "data/" + datetime.now().strftime("%d%m%Y %H:%M:%S")
+        self.path = "data/" + datetime.now().strftime("%s%m%Y %H:%M:%S")
         if not os.path.exists(self.path):
             os.makedirs(self.path)
 
@@ -88,7 +88,7 @@ class ProducerThread(Thread):
         while not self.stop_event.is_set():
             value = self.handle_produce(self.sensor_imu)
             self.pipe.appendleft(value)
-            logging.debug("Produced: %d -> %s", value, str(self.pipe))
+            logging.debug("Produced: %s -> %s", str(value), str(self.pipe))
             time.sleep(self.period - ((time.time() - starttime) % self.period))
  
 class ReaderThread(Thread):
@@ -104,7 +104,7 @@ class ReaderThread(Thread):
         while not self.stop_event.is_set():
             if len(self.pipe) > 0:
                 self.handle_read(self.pipe[0])
-                logging.debug("Read: %d -> %s", self.pipe[0], str(self.pipe))
+                logging.debug("Read: %s -> %s", str(self.pipe[0]), str(self.pipe))
             else:
                 logging.debug("Read: Empty pipe")
             time.sleep(self.period - ((time.time() - starttime) % self.period))
@@ -125,13 +125,13 @@ class ConsumerThread(Thread):
                 while len(self.pipe) > 10:
                     values.append(self.pipe.pop())
                 self.handle_consume(values)
-                logging.debug("Consumed: %s -> %s", values, str(self.pipe))
+                logging.debug("Consumed: %s -> %s", str(values), str(self.pipe))
                 time.sleep(self.period - ((time.time() - starttime) % self.period))
         values = []
         while len(self.pipe) > 0:
             values.append(self.pipe.pop())
         self.handle_consume(values)
-        logging.debug("Consumed: %s -> %s", values, str(self.pipe))
+        logging.debug("Consumed: %s -> %s", str(values), str(self.pipe))
 
 
 mcQueen = Mcqueen()
