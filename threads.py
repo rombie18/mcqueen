@@ -54,6 +54,7 @@ class Mcqueen:
 
         def handle_produce_sensor_imu(self):
             return {
+                'time': datetime.now(),
                 'temperature': self.sensor_imu.temperature,
                 'acceleration': self.sensor_imu.acceleration,
                 'magnetic': self.sensor_imu.magnetic,
@@ -66,7 +67,7 @@ class Mcqueen:
             
         def handle_produce_sensor_stats(self):
             with jtop() as jetson:
-                print(jetson.stats)
+                return jetson.stats
 
         def handle_read_sensor_imu(self, item):
             self.heading = item["euler"][0]
