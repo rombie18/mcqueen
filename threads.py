@@ -42,16 +42,17 @@ class Mcqueen:
             os.makedirs(self.path)
 
         # Threads
+        print("Starting threads...")
         self.stop_event = Event()
         self.startThreads()
 
     def startThreads(self):
 
         def handle_produce_sensor_imu():
-            return self.sensor_imu.euler
+            return self.sensor_imu.euler[0]
 
         def handle_read_sensor_imu(value):
-            print(vars(value))
+            print(value)
             
         def handle_consume_sensor_imu(values):
             filename = "imu.csv"
