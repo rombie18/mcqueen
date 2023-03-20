@@ -1,7 +1,7 @@
 import time
 from threading import Event, Thread
 from collections import deque
-# from jtop import jtop
+from jtop import jtop
 import os
 import csv
 import board
