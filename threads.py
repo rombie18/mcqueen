@@ -23,6 +23,7 @@ import threading
 from subprocess import call
 import random
 from datetime import datetime
+import copy
 
 class Mcqueen:
     def __init__(self):
@@ -51,7 +52,7 @@ class Mcqueen:
     def startThreads(self):
 
         def handle_produce_sensor_imu(self):
-            return self.sensor_imu.euler
+            return copy.deepcopy(self.sensor_imu)
 
         def handle_read_sensor_imu(value):
             print(value)
