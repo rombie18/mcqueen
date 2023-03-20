@@ -7,7 +7,7 @@ After=network-online.target
 [Service]
 ExecStart=/home/mcqueen/mcqueen/mcqueen-service.sh
 Type=simple
-Restart=on-failure
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

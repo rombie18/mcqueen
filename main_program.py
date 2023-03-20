@@ -12,6 +12,9 @@ from adafruit_motor import servo as MOTOR
 import pyjoystick
 from pyjoystick.sdl2 import Key, Joystick, run_event_loop
 
+import threading
+from subprocess import call
+
 class McQueen:
     # Main methods
     def __init__(self):
@@ -56,6 +59,13 @@ class McQueen:
         self.motor_pid = PID(1, 0, 0, setpoint=0.1)
         self.motor_pid.output_limits = (0, 0.1)
         self.motor_pid.sample_time = 0.1
+
+        # Image processing
+        print("Initialising image processing...")
+        def image_thread():
+            call(["python", "process_videocapture.py"])
+        processThread = threading.Thread(target=image_thread)  # <- note extra ','
+        processThread.start()
 
         try:
             print("Starting main loop...")
@@ -130,8 +140,8 @@ class McQueen:
 
     def controller_process(self, key):
         try:
-            if key.keytype == "Axis" and key.number == 2:
-                # Right joystick, left - right
+            if key.keytype == "Axis" and key.number == 1:
+                # Left joystick, left - right
                 # Steering
                 self.actuator_servo.angle = -key.raw_value * 90 + 90
 
@@ -139,6 +149,11 @@ class McQueen:
                 # Right trigger button
                 # Throttle
                 self.actuator_motor.throttle = key.raw_value * self.motor_pid.output_limits[1]
+
+            if key.keytype == "Axis" and key.number == 0:
+                # Right trigger button
+                # Throttle
+                self.actuator_motor.throttle = -key.raw_value * self.motor_pid.output_limits[1]
 
             if key.keytype == "Button" and key.number == 0 and key.raw_value == 1:
                 # Pink square button
