@@ -81,3 +81,5 @@ class ControllerTest:
             print("-----------CONTORLLER ERROR-----------")
             print(e)
             print("-----------------CEND-----------------")
+            
+main = ControllerTest()
