@@ -3,6 +3,13 @@ from pyjoystick.sdl2 import Key, Joystick, run_event_loop
 
 class ControllerTest:
     def __init__(self):
+        
+        self.actuator_servo.angle = 0
+        self.actuator_motor.throttle = 0
+        self.motor_pid.output_limits = (0, 0.15)
+        self.pid_control = False
+        self.stop = False
+        
         mngr = pyjoystick.ThreadEventManager(event_loop=run_event_loop, add_joystick=self.controller_add, remove_joystick=self.controller_remove, handle_key_event=self.controller_process)
         mngr.start()
     
