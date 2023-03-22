@@ -70,17 +70,6 @@ class Mcqueen:
         self.actuator_motor = MOTOR.ContinuousServo(
             pwmdriver.channels[1], min_pulse=1000, max_pulse=2000)
 
-        # Controllers
-        print("Initialising controllers...")
-        self.servo_pid = PID(3.5, 6, 0.5, setpoint=self.transform_angle_to_centerangle(
-            self.transform_heading_to_angle(self.set_heading)))
-        self.servo_pid.output_limits = (-90, 90)
-        self.servo_pid.sample_time = 0.1
-        # Max safe speed = 0.3,  Slow = 0.1,  AVG = 0.2
-        self.motor_pid = PID(1, 0, 0, setpoint=0.1)
-        self.motor_pid.output_limits = (0, 0.1)
-        self.motor_pid.sample_time = 0.1
-
         # Telemetry
         self.path = "data/" + datetime.now().strftime("%d%m%Y %H:%M:%S")
         if not os.path.exists(self.path):
@@ -104,10 +93,6 @@ class Mcqueen:
             pipe_sensor_encoder, self.stop_event, self.handle_produce_sensor_encoder, thread_type="SEQUENCE")
         thread_producer_sensor_stats = ProducerThread(
             pipe_sensor_stats, self.stop_event, self.handle_produce_sensor_stats, thread_type="TIMED_LOOP", frequency=1)
-        thread_producer_pid_servo = ProducerThread(
-            pipe_pid_servo, self.stop_event, self.handle_produce_pid_servo, thread_type="LOOP")
-        thread_producer_pid_motor = ProducerThread(
-            pipe_pid_motor, self.stop_event, self.handle_produce_pid_motor, thread_type="LOOP")
 
         thread_reader_sensor_imu = ReaderThread(
             pipe_sensor_imu, self.stop_event, self.handle_read_sensor_imu, thread_type="TIMED_LOOP", frequency=10)
@@ -146,17 +131,14 @@ class Mcqueen:
         }
         
     def handle_produce_sensor_encoder(self, value):
-        return value
+        return {
+            'time': datetime.now(),
+            'position' : value
+        }
 
     def handle_produce_sensor_stats(self):
         with jtop() as jetson:
             return jetson.stats
-        
-    def handle_produce_pid_servo(self):
-        return self.servo_pid(self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.heading)))
-        
-    def handle_produce_pid_motor(self):
-        return self.motor_pid(self.velocity)
     
 
     def handle_read_sensor_imu(self, item):
@@ -167,9 +149,18 @@ class Mcqueen:
         self.velocity = (self.current_position - self.previous_position) / (1/10)
         self.previous_position = self.current_position
         print("speed: ", self.velocity)
+        
 
     def handle_consume_sensor_imu(self, items):
         filename = "imu.csv"
+        with open(self.path + "/" + filename, 'w') as file:
+            writer = csv.writer(file, delimiter="|")
+            writer.writerow(list(items[0].keys()))
+            for item in items:
+                writer.writerow(item.values())
+                
+    def handle_consume_sensor_stats(self, items):
+        filename = "encoder.csv"
         with open(self.path + "/" + filename, 'w') as file:
             writer = csv.writer(file, delimiter="|")
             writer.writerow(list(items[0].keys()))
