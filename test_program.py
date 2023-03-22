@@ -58,6 +58,8 @@ class McQueen:
             
         elif response["tests"] == "Encoder":
             print("Initialising sensors...")
+            print(vars(board.D11))
+            print(vars(board.D12))
             self.sensor_encoder = Encoder(board.D11, board.D12)
             self.test_encoder()
 
