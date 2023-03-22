@@ -3,7 +3,7 @@ import time
 import inquirer
 
 from busio import I2C
-from encoder.py import Encoder
+from encoder import Encoder
 from adafruit_bno055 import BNO055_I2C
 from adafruit_pca9685 import PCA9685
 from adafruit_motor import servo as MOTOR
