@@ -119,7 +119,7 @@ class Mcqueen:
         thread_reader_sensor_imu = ReaderThread(
             pipe_sensor_imu, self.stop_event, self.handle_read_sensor_imu, thread_type="TIMED_LOOP", frequency=10)
         thread_reader_sensor_encoder = ReaderThread(
-            pipe_sensor_encoder, self.stop_event, self.handle_read_sensor_encoder, thread_type="TIMED_LOOP", frequency=10)
+            pipe_sensor_encoder, self.stop_event, self.handle_read_sensor_encoder, thread_type="TIMED_LOOP", frequency=100)
 
         thread_consumer_sensor_imu = ConsumerThread(
             pipe_sensor_imu, self.stop_event, self.handle_consume_sensor_imu, thread_type="TIMED_LOOP", frequency=0.1)
@@ -198,7 +198,7 @@ class Mcqueen:
     def handle_read_sensor_encoder(self, item):
         print("pos: ", item["position"])  
         self.current_position = item["position"] * (8.1/100)
-        self.velocity = (self.current_position - self.previous_position) / (1/10)
+        self.velocity = (self.current_position - self.previous_position) / (1/100)
         self.previous_position = self.current_position
         print("speed: ", self.velocity)
         
