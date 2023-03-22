@@ -79,6 +79,12 @@ class Mcqueen:
         print("Starting threads...")
         self.stop_event = Event()
         self.threads_start()
+        
+        try:
+            while True:
+                time.sleep(0.1)
+        finally:
+            self.stop_event.set()
 
     def threads_start(self):
         pipe_sensor_imu = deque()
