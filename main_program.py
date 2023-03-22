@@ -25,6 +25,11 @@ class McQueen:
         self.stop = False
         self.pid_control = False
         self.set_heading = 0
+        
+        self.current_position = 0
+        self.previous_position = 0
+        self.current_time = 0
+        self.previous_time = 0
 
         # Busses
         print("Initialising busses...")
@@ -92,6 +97,8 @@ class McQueen:
             if self.pid_control:
                 self.cycle_loop_motor()
                 self.cycle_loop_steering()
+                
+        print("speed: ", self.velocity)
 
     def safe_stop(self):
         self.actuator_motor.throttle = 0
