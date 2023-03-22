@@ -58,7 +58,7 @@ class Mcqueen:
         print("Initialising sensors...")
         self.sensor_imu = BNO055_I2C(bus_i2c_2)
         # 162cm = 20 cycles op as encoder ==> per cycle = 8.1cm, 265 counts per cycle 
-        self.sensor_encoder = Encoder(board.D17, board.D18, callback=self.handle_produce_sensor_encoder)
+        self.sensor_encoder = Encoder(board.D17, board.D18)
 
         # Actuators
         print("Initialising actuators...")
@@ -90,7 +90,7 @@ class Mcqueen:
         thread_producer_sensor_imu = ProducerThread(
             pipe_sensor_imu, self.stop_event, self.handle_produce_sensor_imu, thread_type="TIMED_LOOP", frequency=100)
         thread_producer_sensor_encoder = ProducerThread(
-            pipe_sensor_encoder, self.stop_event, self.handle_produce_sensor_encoder, thread_type="SEQUENCE")
+            pipe_sensor_encoder, self.stop_event, self.handle_produce_sensor_encoder, thread_type="TIMED_LOOP", frequency=100)
         thread_producer_sensor_stats = ProducerThread(
             pipe_sensor_stats, self.stop_event, self.handle_produce_sensor_stats, thread_type="TIMED_LOOP", frequency=1)
 
@@ -130,10 +130,10 @@ class Mcqueen:
             'gravity': self.sensor_imu.gravity
         }
         
-    def handle_produce_sensor_encoder(value):
+    def handle_produce_sensor_encoder(self):
         return {
             'time': datetime.now(),
-            'position' : value
+            'position' : self.sensor_encoder.getValue()
         }
 
     def handle_produce_sensor_stats(self):
