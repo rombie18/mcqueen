@@ -86,6 +86,7 @@ class McQueen:
         print("## ENCODER ##")
         while True:
             print("Position: {}".format(self.sensor_encoder.getValue()))
+            time.sleep(0.1)
         print()
 
     def test_servo(self):
