@@ -3,7 +3,7 @@ import time
 import inquirer
 
 from busio import I2C
-# from rotaryio import IncrementalEncoder
+from rotaryio import IncrementalEncoder
 from adafruit_bno055 import BNO055_I2C
 from adafruit_pca9685 import PCA9685
 from adafruit_motor import servo as MOTOR
@@ -55,6 +55,11 @@ class McQueen:
             print("Initialising sensors...")
             self.sensor_imu = BNO055_I2C(bus_i2c_2)
             self.test_imu()
+            
+        elif response["tests"] == "Encoder":
+            print("Initialising sensors...")
+            self.sensor_encoder = IncrementalEncoder(board.D11, board.D12)
+            self.test_encoder()
 
         else:
             print("Nog niet geïmplementeerd!")
@@ -77,7 +82,8 @@ class McQueen:
     def test_encoder(self):
         print()
         print("## ENCODER ##")
-        print("Position: {}".format(self.sensor_encoder.position))
+        while True:
+            print("Position: {}".format(self.sensor_encoder.position))
         print()
 
     def test_servo(self):
