@@ -14,7 +14,7 @@ class Encoder:
         self.callback = callback
         GPIO.setup(self.leftPin, GPIO.IN)
         GPIO.setup(self.rightPin, GPIO.IN)
-        print(GPIO.input(self.leftPin))
+        print("Mode: ", GPIO.getmode())
         GPIO.add_event_detect(self.leftPin, GPIO.BOTH, callback=self.transitionOccurred)  
         GPIO.add_event_detect(self.rightPin, GPIO.BOTH, callback=self.transitionOccurred)  
 
