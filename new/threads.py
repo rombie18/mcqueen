@@ -130,7 +130,7 @@ class Mcqueen:
             'gravity': self.sensor_imu.gravity
         }
         
-    def handle_produce_sensor_encoder(self, value):
+    def handle_produce_sensor_encoder(value):
         return {
             'time': datetime.now(),
             'position' : value
