@@ -145,7 +145,7 @@ class Mcqueen:
         self.heading = item["euler"][0]
         
     def handle_read_sensor_encoder(self, item):        
-        self.current_position = item * (8.1/100)
+        self.current_position = item["position"] * (8.1/100)
         self.velocity = (self.current_position - self.previous_position) / (1/10)
         self.previous_position = self.current_position
         print("speed: ", self.velocity)
