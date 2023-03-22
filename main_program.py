@@ -11,6 +11,7 @@ from adafruit_motor import servo as MOTOR
 
 import pyjoystick
 from pyjoystick.sdl2 import Key, Joystick, run_event_loop
+from encoder import Encoder
 
 import threading
 from subprocess import call
@@ -38,7 +39,7 @@ class McQueen:
         # Sensors
         print("Initialising sensors...")
         self.sensor_imu = BNO055_I2C(bus_i2c_2)
-        # self.sensor_encoder = IncrementalEncoder(board.D10, board.D9)
+        self.sensor_encoder = Encoder(board.D17, board.D18)
         # 162cm = 20 cycles op as encoder ==> per cycle = 8.1cm, 265 counts per cycle 
 
         # Actuators
@@ -63,11 +64,11 @@ class McQueen:
         self.motor_pid.sample_time = 0.1
 
         # Image processing
-        print("Initialising image processing...")
-        def image_thread():
-            call(["python", "process_videocapture.py"])
-        processThread = threading.Thread(target=image_thread)  # <- note extra ','
-        processThread.start()
+        #print("Initialising image processing...")
+        #def image_thread():
+        #    call(["python", "process_videocapture.py"])
+        #processThread = threading.Thread(target=image_thread)  # <- note extra ','
+        #processThread.start()
 
         try:
             print("Starting main loop...")
@@ -106,8 +107,11 @@ class McQueen:
             self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.heading))))
 
     def calculate_velocity(self):
-        if self.motor_pid.setpoint < self.velocity:
-            self.velocity = self.velocity + 0.00001
+        self.current_position = self.sensor_encoder.getValue() * 81
+        self.current_time = time.time_ns() // 1000000
+        self.velocity = (self.current_position - self.previous_position) / (self.current_time - self.previous_time)
+        self.previous_position = self.current_position
+        self.previous_time = self.current_time
 
     def calculate_heading(self):
         self.heading = self.sensor_imu.euler[0]
