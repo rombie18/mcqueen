@@ -6,13 +6,12 @@ import Jetson.GPIO as GPIO
 class Encoder:
 
     def __init__(self, leftPin, rightPin, callback=None):
-        self.leftPin = leftPin
-        self.rightPin = rightPin
+        self.leftPin = leftPin["id"]
+        self.rightPin = rightPin["id"]
         self.value = 0
         self.state = '00'
         self.direction = None
         self.callback = callback
-        print("Mode: ", GPIO.getmode())
         GPIO.setup(self.leftPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.setup(self.rightPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.add_event_detect(self.leftPin, GPIO.BOTH, callback=self.transitionOccurred)  
