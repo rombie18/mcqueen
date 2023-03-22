@@ -98,6 +98,8 @@ class McQueen:
                 self.cycle_loop_motor()
                 self.cycle_loop_steering()
                 
+            time.sleep(0.001)
+                
         print("speed: ", self.velocity)
 
     def safe_stop(self):
