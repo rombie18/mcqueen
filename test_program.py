@@ -60,7 +60,7 @@ class McQueen:
             print("Initialising sensors...")
             print(vars(board.D11))
             print(vars(board.D12))
-            self.sensor_encoder = Encoder(board.D11, board.D12)
+            self.sensor_encoder = Encoder(board.D17, board.D18)
             self.test_encoder()
 
         else:
