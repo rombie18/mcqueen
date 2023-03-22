@@ -159,7 +159,7 @@ class Mcqueen:
             for item in items:
                 writer.writerow(item.values())
                 
-    def handle_consume_sensor_stats(self, items):
+    def handle_consume_sensor_encoder(self, items):
         filename = "encoder.csv"
         with open(self.path + "/" + filename, 'w') as file:
             writer = csv.writer(file, delimiter="|")
