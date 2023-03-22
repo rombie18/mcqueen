@@ -10,9 +10,9 @@ from adafruit_motor import servo as MOTOR
 
 tests = [
   inquirer.List('tests',
-                message="Welke test wil je uitvoeren?",
-                choices=['Servo', 'Motor', 'Gyro/IMU', 'Encoder', 'Joystick/Controller', 'Camera'],
-            ),
+        message="Welke test wil je uitvoeren?",
+        choices=['Servo', 'Motor', 'Gyro/IMU', 'Encoder', 'Joystick/Controller', 'Camera'],
+    ),
 ]
 
 
