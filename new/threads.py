@@ -69,6 +69,17 @@ class Mcqueen:
         # Motor ESC rc car, T: 20.08ms, PW: (1000µs to 2000µs)
         self.actuator_motor = MOTOR.ContinuousServo(
             pwmdriver.channels[1], min_pulse=1000, max_pulse=2000)
+        
+        # Controllers
+        print("Initialising PID controllers...")
+        # PID: throttle 0.3 -> 3.5, 6, 0.5
+        self.servo_pid = PID(3.5, 0, 0.5, setpoint=self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading)))
+        self.servo_pid.output_limits = (-90, 90)
+        self.servo_pid.sample_time = 0.1
+        # Max safe speed = 0.3,  Slow = 0.1,  AVG = 0.2
+        self.motor_pid = PID(1, 0, 0, setpoint=0.1)
+        self.motor_pid.output_limits = (0, 0.1)
+        self.motor_pid.sample_time = 0.1
 
         # Telemetry
         self.path = "data/" + datetime.now().strftime("%d%m%Y %H:%M:%S")
@@ -92,8 +103,7 @@ class Mcqueen:
         pipe_sensor_imu = deque()
         pipe_sensor_encoder = deque()
         pipe_sensor_stats = deque()
-        pipe_pid_servo = deque()
-        pipe_pid_motor = deque()
+        pipe_pids = deque()
 
         thread_producer_sensor_imu = ProducerThread(
             pipe_sensor_imu, self.stop_event, self.handle_produce_sensor_imu, thread_type="TIMED_LOOP", frequency=100)
@@ -101,6 +111,8 @@ class Mcqueen:
             pipe_sensor_encoder, self.stop_event, self.handle_produce_sensor_encoder, thread_type="TIMED_LOOP", frequency=100)
         thread_producer_sensor_stats = ProducerThread(
             pipe_sensor_stats, self.stop_event, self.handle_produce_sensor_stats, thread_type="TIMED_LOOP", frequency=1)
+        thread_producer_pids = ProducerThread(
+            pipe_pids, self.stop_event, self.handle_produce_pids, thread_type="LOOP")
 
         thread_reader_sensor_imu = ReaderThread(
             pipe_sensor_imu, self.stop_event, self.handle_read_sensor_imu, thread_type="TIMED_LOOP", frequency=10)
@@ -113,10 +125,13 @@ class Mcqueen:
             pipe_sensor_encoder, self.stop_event, self.handle_consume_sensor_encoder, thread_type="TIMED_LOOP", frequency=0.1)
         thread_consumer_sensor_stats = ConsumerThread(
             pipe_sensor_stats, self.stop_event, self.handle_consume_sensor_stats, thread_type="TIMED_LOOP", frequency=0.1)
+        thread_consumer_pids = ConsumerThread(
+            pipe_pids, self.stop_event, self.handle_consume_pids, thread_type="TIMED_LOOP", frequency=0.1)
 
         thread_producer_sensor_imu.start()
         thread_producer_sensor_encoder.start()
         thread_producer_sensor_stats.start()
+        thread_producer_pids.start()
 
         thread_reader_sensor_imu.start()
         thread_reader_sensor_encoder.start()
@@ -124,8 +139,10 @@ class Mcqueen:
         thread_consumer_sensor_imu.start()
         thread_consumer_sensor_encoder.start()
         thread_consumer_sensor_stats.start()
+        thread_consumer_pids.start()
+        
 
-    def handle_produce_sensor_imu(self):
+    def handle_produce_sensor_imu(self):       
         return {
             'time': datetime.now(),
             'temperature': self.sensor_imu.temperature,
@@ -147,7 +164,31 @@ class Mcqueen:
     def handle_produce_sensor_stats(self):
         with jtop() as jetson:
             return jetson.stats
-    
+        
+    def handle_produce_pids(self):
+        pid_motor_measured = self.velocity
+        pid_motor_actuated = self.motor_pid(pid_motor_measured)
+        self.actuator_motor.throttle = pid_motor_actuated
+        
+        pid_servo_measured = self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.heading))
+        pid_servo_actuated = self.servo_pid(pid_servo_measured)
+        self.actuator_servo.angle = self.transform_centerangle_to_angle(pid_servo_actuated)
+        return {
+            'time': datetime.now(),
+            'pid_servo_Kp' : self.servo_pid.Kp,
+            'pid_servo_Ki' : self.servo_pid.Ki,
+            'pid_servo_Kd' : self.servo_pid.Kd,
+            'pid_servo_setpoint' : self.servo_pid.setpoint,
+            'pid_servo_measured_value' : pid_servo_measured,
+            'pid_servo_actuated_value' : pid_servo_actuated,
+            'pid_motor_Kp' : self.motor_pid.Kp,
+            'pid_motor_Ki' : self.motor_pid.Ki,
+            'pid_motor_Kd' : self.motor_pid.Kd,
+            'pid_motor_setpoint' : self.motor_pid.setpoint,
+            'pid_motor_measured_value' : pid_motor_measured,
+            'pid_motor_actuated_value' : pid_motor_actuated
+        }
+            
 
     def handle_read_sensor_imu(self, item):
         self.heading = item["euler"][0]
@@ -182,6 +223,34 @@ class Mcqueen:
             writer.writerow(list(items[0].keys()))
             for item in items:
                 writer.writerow(item.values())
+                
+    def handle_consume_pids(self, items):
+        filename = "pids.csv"
+        with open(self.path + "/" + filename, 'w') as file:
+            writer = csv.writer(file, delimiter="|")
+            writer.writerow(list(items[0].keys()))
+            for item in items:
+                writer.writerow(item.values())
+                
+                
+    # Helper functions
+    def transform_heading_to_angle(self, heading):
+        if heading > 180:
+            if heading > 270:
+                return -heading + 450
+            else:
+                return 180
+        else:
+            if heading < 90:
+                return -heading + 90
+            else:
+                return 0
+
+    def transform_angle_to_centerangle(self, angle):
+        return angle - 90
+
+    def transform_centerangle_to_angle(self, centerangle):
+        return centerangle + 90
 
 
 mcQueen = Mcqueen()
