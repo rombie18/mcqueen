@@ -61,6 +61,10 @@ class McQueen:
         self.motor_pid = PID(1, 0, 0, setpoint=0.1)
         self.motor_pid.output_limits = (0, 0.1)
         self.motor_pid.sample_time = 0.1
+        
+        print(vars(self.servo_pid))
+        
+        exit()
 
         # Image processing
         print("Initialising image processing...")

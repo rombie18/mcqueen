@@ -83,6 +83,8 @@ class Mcqueen:
         try:
             while True:
                 time.sleep(0.1)
+        except:
+            print("Stopping all threads...")
         finally:
             self.stop_event.set()
 
