@@ -52,7 +52,8 @@ class McQueen:
 
         # Controllers
         print("Initialising controllers...")
-        self.servo_pid = PID(3.5, 6, 0.5, setpoint=self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading)))
+        # PID: throttle 0.3 -> 3.5, 6, 0.5
+        self.servo_pid = PID(3.5, 0, 0.5, setpoint=self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading)))
         self.servo_pid.output_limits = (-90, 90)
         self.servo_pid.sample_time = 0.1
         # Max safe speed = 0.3,  Slow = 0.1,  AVG = 0.2

@@ -87,8 +87,8 @@ class Mcqueen:
         pipe_sensor_imu = deque()
         pipe_sensor_encoder = deque()
         pipe_sensor_stats = deque()
-        pipe_pid_servo
-        pipe_pid_motor
+        pipe_pid_servo = deque()
+        pipe_pid_motor = deque()
 
         thread_producer_sensor_imu = ProducerThread(
             pipe_sensor_imu, self.stop_event, self.handle_produce_sensor_imu, thread_type="TIMED_LOOP", frequency=100)
