@@ -12,7 +12,9 @@ class Encoder:
         self.state = '00'
         self.direction = None
         self.callback = callback
+        print("Mode: ", GPIO.getmode())
         GPIO.setmode(GPIO.BCM)
+        print("Mode: ", GPIO.getmode())
         GPIO.setup(self.leftPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.setup(self.rightPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.add_event_detect(self.leftPin, GPIO.BOTH, callback=self.transitionOccurred)  
