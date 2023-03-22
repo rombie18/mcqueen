@@ -191,14 +191,14 @@ class McQueen:
                 print(vars(key))
                 # Left hat left
                 # Decrease PID heading
-                self.set_heading = self.set_heading + 5
+                self.set_heading = self.set_heading - 5
                 self.servo_pid.setpoint = self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading))
                 print("PID heading set to ", self.set_heading)
 
             if key.keytype == "Hat" and key.number == 0 and key.raw_value == 2:
                 # Left hat right
                 # Increase PID heading
-                self.set_heading = self.set_heading - 5
+                self.set_heading = self.set_heading + 5
                 self.servo_pid.setpoint = self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading))
                 print("PID heading set to ", self.set_heading)
 
