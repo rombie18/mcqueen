@@ -6,8 +6,8 @@ import Jetson.GPIO as GPIO
 class Encoder:
 
     def __init__(self, leftPin, rightPin, callback=None):
-        self.leftPin = leftPin["id"]
-        self.rightPin = rightPin["id"]
+        self.leftPin = leftPin.id
+        self.rightPin = rightPin.id
         self.value = 0
         self.state = '00'
         self.direction = None
