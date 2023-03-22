@@ -58,7 +58,7 @@ class Mcqueen:
         print("Initialising sensors...")
         self.sensor_imu = BNO055_I2C(bus_i2c_2)
         # 162cm = 20 cycles op as encoder ==> per cycle = 8.1cm, 265 counts per cycle 
-        self.sensor_encoder = Encoder(26, 19, callback=self.handle_produce_sensor_encoder)
+        self.sensor_encoder = Encoder(board.D17, board.D18, callback=self.handle_produce_sensor_encoder)
 
         # Actuators
         print("Initialising actuators...")
