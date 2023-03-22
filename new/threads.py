@@ -98,6 +98,8 @@ class Mcqueen:
             print("Stopping all threads...")
         finally:
             self.stop_event.set()
+            self.actuator_motor.throttle = 0
+            self.actuator_servo.angle = self.transform_heading_to_angle(0)
 
     def threads_start(self):
         pipe_sensor_imu = deque()
@@ -193,7 +195,8 @@ class Mcqueen:
     def handle_read_sensor_imu(self, item):
         self.heading = item["euler"][0]
         
-    def handle_read_sensor_encoder(self, item):        
+    def handle_read_sensor_encoder(self, item):
+        print("pos: ", item["position"])  
         self.current_position = item["position"] * (8.1/100)
         self.velocity = (self.current_position - self.previous_position) / (1/10)
         self.previous_position = self.current_position
