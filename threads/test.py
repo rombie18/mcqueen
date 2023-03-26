@@ -11,7 +11,8 @@ thread_producer_sensor_imu.start()
 
 try:
     while True:
-        time.sleep(0.1)
+        print(pipe_sensor_imu[0])
+        time.sleep(1)
 except:
     print("Stopping all threads...")
 finally:
