@@ -4,7 +4,7 @@ from collections import deque
 from threading import Event
 from IMUThread import IMUThread
 
-pp = pprint.PrettyPrinter(indent=4)
+pp = pprint.PrettyPrinter(indent=4, depth=4)
 
 stop_event = Event()
 
