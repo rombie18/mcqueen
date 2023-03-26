@@ -1,7 +1,10 @@
 import time
+import pprint
 from collections import deque
 from threading import Event
 from IMUThread import IMUThread
+
+pp = pprint.PrettyPrinter(indent=4)
 
 stop_event = Event()
 
@@ -12,7 +15,7 @@ thread_producer_sensor_imu.start()
 try:
     while True:
         if len(pipe_sensor_imu) > 0:
-            print(pipe_sensor_imu[0])
+            pp.pprint(pipe_sensor_imu[-1])
         time.sleep(1)
 except Exception as e:
             print("-----------ERROR-----------")
