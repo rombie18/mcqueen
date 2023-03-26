@@ -20,6 +20,8 @@ try:
     while True:
         if len(pipe_sensor_imu) > 0:
             pp.pprint(pipe_sensor_imu[-1])
+        if len(pipe_sensor_encoder) > 0:
+            pp.pprint(pipe_sensor_encoder[-1])
         time.sleep(1)
 except Exception as e:
             print("-----------ERROR-----------")
