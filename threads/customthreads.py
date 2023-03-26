@@ -11,29 +11,29 @@ from encoder import Encoder
 
 class IMUThread(Thread):
     def __init__(self, pipe, stop_event):
-        super(IMUThread, self).__init__(name="IMUThread")
-        logging.getLogger()
-        
+        super(IMUThread, self).__init__(name="IMUThread")        
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
+
+    def run(self):
+        logging.getLogger()
         
         logging.info("Initialising IMU...")
         bus_i2c = I2C(board.SCL_1, board.SDA_1)
-        self.sensor_imu = BNO055_I2C(bus_i2c)
-
-    def run(self):
+        sensor_imu = BNO055_I2C(bus_i2c)
+        
         logging.info("Starting IMU")
         while not self.stop_event.is_set():
             self.pipe.append({
                 'time': datetime.now(),
-                'temperature': self.sensor_imu.temperature,
-                'acceleration': self.sensor_imu.acceleration,
-                'magnetic': self.sensor_imu.magnetic,
-                'gyro': self.sensor_imu.gyro,
-                'euler': self.sensor_imu.euler,
-                'quaternion': self.sensor_imu.quaternion,
-                'linear_acceleration': self.sensor_imu.linear_acceleration,
-                'gravity': self.sensor_imu.gravity
+                'temperature': sensor_imu.temperature,
+                'acceleration': sensor_imu.acceleration,
+                'magnetic': sensor_imu.magnetic,
+                'gyro': sensor_imu.gyro,
+                'euler': sensor_imu.euler,
+                'quaternion': sensor_imu.quaternion,
+                'linear_acceleration': sensor_imu.linear_acceleration,
+                'gravity': sensor_imu.gravity
             })
             time.sleep(0.1)
             
@@ -41,19 +41,20 @@ class IMUThread(Thread):
 class EncoderThread(Thread):
     def __init__(self, pipe, stop_event):
         super(EncoderThread, self).__init__(name="EncoderThread")
-        logging.getLogger()
         
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
-        
-        logging.info("Initialising Encoder...")
-        self.sensor_encoder = Encoder(board.D17, board.D18)
 
     def run(self):
+        logging.getLogger()
+        
+        logging.info("Initialising Encoder...")
+        sensor_encoder = Encoder(board.D17, board.D18)
+        
         logging.info("Starting Encoder")
         while not self.stop_event.is_set():
             self.pipe.append({
                 'time': datetime.now(),
-                'position': self.sensor_encoder.getValue()
+                'position': sensor_encoder.getValue()
             })
             time.sleep(0.1)
