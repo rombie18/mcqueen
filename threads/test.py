@@ -13,8 +13,8 @@ thread_producer_sensor_imu = IMUThread(pipe_sensor_imu, stop_event)
 thread_producer_sensor_imu.start()
 
 pipe_sensor_encoder = deque(maxlen=100)
-thread_producer_sensor_imu = EncoderThread(pipe_sensor_encoder, stop_event)
-thread_producer_sensor_imu.start()
+thread_producer_sensor_encoder = EncoderThread(pipe_sensor_encoder, stop_event)
+thread_producer_sensor_encoder.start()
 
 try:
     while True:
