@@ -2,7 +2,7 @@
 
 # Install generic libraries
 apt update
-apt install nano
+apt install -y nano
 
 # Install CircuitPython
 apt install -y python3 python3-pip

@@ -65,7 +65,7 @@ class McQueen:
         self.servo_pid.sample_time = 0.1
         # Max safe speed = 0.3,  Slow = 0.1,  AVG = 0.2
         self.motor_pid = PID(1, 0, 0, setpoint=0.1)
-        self.motor_pid.output_limits = (0, 0.1)
+        self.motor_pid.output_limits = (0, 0.2)
         self.motor_pid.sample_time = 0.1
 
         # Image processing
@@ -97,9 +97,6 @@ class McQueen:
             if self.pid_control:
                 self.cycle_loop_motor()
                 self.cycle_loop_steering()
-                
-            print("speed: ", self.velocity)
-            time.sleep(0.001)
                 
 
     def safe_stop(self):
