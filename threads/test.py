@@ -19,10 +19,12 @@ thread_producer_sensor_encoder.start()
 try:
     while True:
         time.sleep(1)
+except KeyboardInterrupt:
+    logging.debug("KeyboardInterrupt: Stopping program")
 except Exception as e:
-            print("-----------ERROR-----------")
-            print(e)
-            print("------------END------------")
+    logging.fatal(e)
 finally:
-    print("Stopping all threads...")
+    logging.info("Signaling threads to stop")
     stop_event.set()
+    thread_producer_sensor_imu.join()
+    thread_producer_sensor_encoder.join()
