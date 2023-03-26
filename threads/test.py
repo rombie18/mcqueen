@@ -13,7 +13,10 @@ try:
     while True:
         print(pipe_sensor_imu[0])
         time.sleep(1)
-except:
-    print("Stopping all threads...")
+except Exception as e:
+            print("-----------ERROR-----------")
+            print(e)
+            print("------------END------------")
 finally:
+    print("Stopping all threads...")
     stop_event.set()
