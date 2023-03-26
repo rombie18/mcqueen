@@ -1,8 +1,11 @@
 import time
+import logging
 from collections import deque
 from threading import Event
 from customthreads import IMUThread, EncoderThread
 
+logging.getLogger()
+logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(threadName)s: %(message)s")
 stop_event = Event()
 
 pipe_sensor_imu = deque(maxlen=100)

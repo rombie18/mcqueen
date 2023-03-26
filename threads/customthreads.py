@@ -11,17 +11,18 @@ from encoder import Encoder
 
 class IMUThread(Thread):
     def __init__(self, pipe, stop_event):
-        super(IMUThread, self).__init__()
+        super(IMUThread, self).__init__(name="IMUThread")
+        logging.getLogger()
         
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
         
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
-        
+        logging.info("Initialising IMU...")
         bus_i2c = I2C(board.SCL_1, board.SDA_1)
         self.sensor_imu = BNO055_I2C(bus_i2c)
 
     def run(self):
+        logging.info("Starting IMU")
         while not self.stop_event.is_set():
             self.pipe.append({
                 'time': datetime.now(),
@@ -39,16 +40,17 @@ class IMUThread(Thread):
 
 class EncoderThread(Thread):
     def __init__(self, pipe, stop_event):
-        super(EncoderThread, self).__init__()
+        super(EncoderThread, self).__init__(name="EncoderThread")
+        logging.getLogger()
         
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
         
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
-        
+        logging.info("Initialising Encoder...")
         self.sensor_encoder = Encoder(board.D17, board.D18)
 
     def run(self):
+        logging.info("Starting Encoder")
         while not self.stop_event.is_set():
             self.pipe.append({
                 'time': datetime.now(),
