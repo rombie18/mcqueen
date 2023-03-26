@@ -9,7 +9,7 @@ from adafruit_bno055 import BNO055_I2C
 
 class IMUThread(Thread):
     def __init__(self, pipe, stop_event):
-        super(CustomThread, self).__init__()
+        super(IMUThread, self).__init__()
         
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
