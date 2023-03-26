@@ -1,7 +1,6 @@
 import time
-import datetime
-import logging
 import board
+from  datetime import datetime
 from threading import Thread, Event
 from collections import deque
 from busio import I2C
