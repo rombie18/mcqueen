@@ -1,5 +1,6 @@
 import time
 import board
+import logging
 from  datetime import datetime
 from threading import Thread, Event
 from collections import deque
