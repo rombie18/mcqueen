@@ -6,6 +6,8 @@ from threading import Thread, Event
 from collections import deque
 from busio import I2C
 from adafruit_bno055 import BNO055_I2C
+from encoder import Encoder
+
 
 class IMUThread(Thread):
     def __init__(self, pipe, stop_event):
@@ -31,5 +33,25 @@ class IMUThread(Thread):
                 'quaternion': self.sensor_imu.quaternion,
                 'linear_acceleration': self.sensor_imu.linear_acceleration,
                 'gravity': self.sensor_imu.gravity
+            })
+            time.sleep(0.1)
+            
+
+class EncoderThread(Thread):
+    def __init__(self, pipe, stop_event):
+        super(EncoderThread, self).__init__()
+        
+        self.pipe: deque = pipe
+        self.stop_event: Event = stop_event
+        
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
+        
+        self.sensor_encoder = Encoder(board.D17, board.D18)
+
+    def run(self):
+        while not self.stop_event.is_set():
+            self.pipe.append({
+                'time': datetime.now(),
+                'position': self.sensor_encoder.getValue()
             })
             time.sleep(0.1)
