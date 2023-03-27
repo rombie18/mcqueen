@@ -7,6 +7,7 @@ from collections import deque
 from busio import I2C
 from adafruit_bno055 import BNO055_I2C
 from encoder import Encoder
+from jtop import jtop
 
 
 class IMUThread(Thread):
@@ -58,3 +59,18 @@ class EncoderThread(Thread):
                 'position': sensor_encoder.getValue()
             })
             time.sleep(0.1)
+            
+class StatsThread(Thread):
+    def __init__(self, pipe, stop_event):
+        super(StatsThread, self).__init__(name="StatsThread")
+        
+        self.pipe: deque = pipe
+        self.stop_event: Event = stop_event
+
+    def run(self):
+        logging.getLogger()
+        
+        logging.info("Starting Stats")
+        with jtop() as jetson:
+            while not self.stop_event.is_set() and jetson.ok():
+                self.pipe.append(jetson.stats)

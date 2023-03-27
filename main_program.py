@@ -113,11 +113,7 @@ class McQueen:
             self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.heading))))
 
     def calculate_velocity(self):
-        self.current_position = self.sensor_encoder.getValue() * 81
-        self.current_time = time.time_ns() // 1000000
-        self.velocity = (self.current_position - self.previous_position) / (self.current_time - self.previous_time)
-        self.previous_position = self.current_position
-        self.previous_time = self.current_time
+        self.velocity = 0
 
     def calculate_heading(self):
         self.heading = self.sensor_imu.euler[0]
