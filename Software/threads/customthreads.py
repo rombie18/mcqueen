@@ -8,6 +8,10 @@ from busio import I2C
 from adafruit_bno055 import BNO055_I2C
 from encoder import Encoder
 from jtop import jtop
+from pyjoystick.sdl2 import Key, Joystick, run_event_loop
+from adafruit_motor import servo as MOTOR
+from simple_pid import PID
+from adafruit_pca9685 import PCA9685
 
 
 class IMUThread(Thread):
@@ -19,9 +23,11 @@ class IMUThread(Thread):
     def run(self):
         logging.getLogger()
         
+        logging.info("Initialising I2C bus 2...")
+        bus_i2c_2 = I2C(board.SCL_1, board.SDA_1)
+        
         logging.info("Initialising IMU...")
-        bus_i2c = I2C(board.SCL_1, board.SDA_1)
-        sensor_imu = BNO055_I2C(bus_i2c)
+        sensor_imu = BNO055_I2C(bus_i2c_2)
         
         logging.info("Starting IMU")
         while not self.stop_event.is_set():
@@ -74,3 +80,61 @@ class StatsThread(Thread):
         with jtop() as jetson:
             while not self.stop_event.is_set() and jetson.ok():
                 self.pipe.append(jetson.stats)
+                
+class ControllerThread(Thread):
+    def __init__(self, pipe, stop_event):
+        super(ControllerThread, self).__init__(name="ControllerThread")
+        
+        self.pipe: deque = pipe
+        self.stop_event: Event = stop_event
+
+    def run(self):
+        logging.getLogger()
+        
+        logging.info("Starting Controller")
+        run_event_loop(controller_add, controller_remove, controller_process, alive=controller_alive)
+            
+        def controller_add(self, joy):
+            data = {
+                'time': datetime.now(),
+                'type': "add"
+            }
+            data.update(vars(joy))
+            self.pipe.append(data)
+            
+        def controller_remove(self, joy):
+            data = {
+                'time': datetime.now(),
+                'type': "remove"
+            }
+            data.update(vars(joy))
+            self.pipe.append(data)
+            
+        def controller_process(self, key):
+            data = {
+                'time': datetime.now(),
+                'type': "event"
+            }
+            data.update(vars(key))
+            self.pipe.append(data)
+            
+        def controller_alive(self):
+            return self.stop_event.is_set()
+        
+class ImageProcessingThread(Thread):
+    def __init__(self, pipe, stop_event):
+        super(ImageProcessingThread, self).__init__(name="ImageProcessingThread")
+        
+        self.pipe: deque = pipe
+        self.stop_event: Event = stop_event
+
+    def run(self):
+        logging.getLogger()
+        
+        logging.info("Initialising Image Processing...")
+        pass
+        
+        logging.info("Starting Image Processing")
+        while not self.stop_event.is_set():
+            # Add image processing algorithm here
+            time.sleep(1)
