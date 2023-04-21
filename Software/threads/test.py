@@ -50,7 +50,7 @@ class McQueen:
         self.pipe_sensor_imageprocessing = deque(maxlen=100)
 
         self.threads = []
-        self.threads.append(IMUThread(self.pipe_sensor_imu, self.stop_event))
+        #self.threads.append(IMUThread(self.pipe_sensor_imu, self.stop_event))
         self.threads.append(EncoderThread(self.pipe_sensor_encoder, self.stop_event))
         self.threads.append(StatsThread(self.pipe_sensor_stats, self.stop_event))
         self.threads.append(ControllerThread(self.pipe_sensor_controller, self.stop_event))
