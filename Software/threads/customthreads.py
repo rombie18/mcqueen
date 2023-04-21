@@ -92,34 +92,34 @@ class ControllerThread(Thread):
         logging.getLogger()
         
         logging.info("Starting Controller")
-        run_event_loop(controller_add, controller_remove, controller_process, alive=controller_alive)
+        run_event_loop(self.__controller_add, self.__controller_remove, self.__controller_process, alive=self.__controller_alive)
             
-        def controller_add(self, joy):
-            data = {
-                'time': datetime.now(),
-                'type': "add"
-            }
-            data.update(vars(joy))
-            self.pipe.append(data)
-            
-        def controller_remove(self, joy):
-            data = {
-                'time': datetime.now(),
-                'type': "remove"
-            }
-            data.update(vars(joy))
-            self.pipe.append(data)
-            
-        def controller_process(self, key):
-            data = {
-                'time': datetime.now(),
-                'type': "event"
-            }
-            data.update(vars(key))
-            self.pipe.append(data)
-            
-        def controller_alive(self):
-            return self.stop_event.is_set()
+    def __controller_add(self, joy):
+        data = {
+            'time': datetime.now(),
+            'type': "add"
+        }
+        data.update(vars(joy))
+        self.pipe.append(data)
+        
+    def __controller_remove(self, joy):
+        data = {
+            'time': datetime.now(),
+            'type': "remove"
+        }
+        data.update(vars(joy))
+        self.pipe.append(data)
+        
+    def __controller_process(self, key):
+        data = {
+            'time': datetime.now(),
+            'type': "event"
+        }
+        data.update(vars(key))
+        self.pipe.append(data)
+        
+    def __controller_alive(self):
+        return self.stop_event.is_set()
         
 class ImageProcessingThread(Thread):
     def __init__(self, pipe, stop_event):
