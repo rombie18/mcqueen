@@ -67,10 +67,11 @@ class McQueen:
             
             
     def calculate_velocity(self):
+        # 162cm = 20 cycles op as encoder ==> per cycle = 8.1cm, 265 counts per cycle ==> per count = 0.3056603773584905660377358490566cm
         if len(self.pipe_sensor_encoder) > 2:
             self._current_encoder = self.pipe_sensor_encoder[-1]
             if self._previous_encoder != None:
-                self.velocity = (self._current_encoder["position"] - self._previous_encoder["position"]) / (self._current_encoder["time"] - self._previous_encoder["time"]).total_seconds()
+                self.velocity = (self._current_encoder["position"] - self._previous_encoder["position"]) * 0.30566 / (self._current_encoder["time"] - self._previous_encoder["time"]).total_seconds()
             self._previous_encoder = self._current_encoder
         
     def calculate_heading(self):
