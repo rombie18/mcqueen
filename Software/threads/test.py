@@ -17,7 +17,16 @@ threads.append(IMUThread(pipe_sensor_imu, stop_event))
 threads.append(EncoderThread(pipe_sensor_encoder, stop_event))
 threads.append(StatsThread(pipe_sensor_stats, stop_event))
 
+def threads_start():
+    for thread in threads:
+        thread.start()
 
+def threads_stop():
+    stop_event.set()
+    for thread in threads:
+        thread.join()
+
+threads_start()
 try:
     while True:
         time.sleep(1)
@@ -29,11 +38,3 @@ finally:
     logging.info("Signaling threads to stop")
 
     
-def threads_start():
-    for thread in threads:
-        thread.start()
-
-def threads_stop():
-    stop_event.set()
-    for thread in threads:
-        thread.join()
