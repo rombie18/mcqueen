@@ -5,7 +5,7 @@ from threading import Event
 from customthreads import IMUThread, EncoderThread, StatsThread, ControllerThread, ImageProcessingThread
 
 class McQueen:
-    def __init(self):
+    def __init__(self):
         
         logging.getLogger()
         logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(threadName)-16s | %(message)s")
