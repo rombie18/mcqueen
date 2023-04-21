@@ -64,7 +64,7 @@ class Encoder:
                     
             self.state = newState
         except Exception as e:
-            print("Exception in encoder: " + e)
+            print("Exception in encoder: " + str(e))
             pass
 
     def getValue(self):
