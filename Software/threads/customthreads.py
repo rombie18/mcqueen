@@ -61,7 +61,7 @@ class EncoderThread(Thread):
             logging.getLogger()
             
             logging.info("Initialising Encoder...")
-            sensor_encoder = Encoder(board.D17, board.D18)
+            sensor_encoder = Encoder(board.D6, board.D12)
             
             logging.info("Starting Encoder")
             while not self.stop_event.is_set():

@@ -44,7 +44,7 @@ class McQueen:
         # Sensors
         print("Initialising sensors...")
         self.sensor_imu = BNO055_I2C(bus_i2c_2)
-        self.sensor_encoder = Encoder(board.D17, board.D18)
+        self.sensor_encoder = Encoder(board.D6, board.D12)
         # 162cm = 20 cycles op as encoder ==> per cycle = 8.1cm, 265 counts per cycle 
 
         # Actuators
