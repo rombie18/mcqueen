@@ -29,7 +29,7 @@ class McQueen:
                 self.calculate_heading()
                 print("Heading: " + str(self.heading))
                 print("Velocity: " + str(self.velocity))
-                time.sleep(0.1)
+                time.sleep(0.5)
                 
         except KeyboardInterrupt:
             pass
