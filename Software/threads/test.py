@@ -64,14 +64,15 @@ class McQueen:
             
             
     def calculate_velocity(self):
-        self._current_encoder = self.pipe_sensor_encoder[-1]
-        if self._previous_encoder:
-            self.velocity = (self._current_encoder["position"] - self._previous_encoder["position"]) / (self._current_encoder["time"] - self._previous_encoder["time"])
-            
-        self._previous_encoder = self._current_encoder
+        if len(self.pipe_sensor_encoder) != 0:
+            self._current_encoder = self.pipe_sensor_encoder[-1]
+            if self._previous_encoder:
+                self.velocity = (self._current_encoder["position"] - self._previous_encoder["position"]) / (self._current_encoder["time"] - self._previous_encoder["time"])
+            self._previous_encoder = self._current_encoder
         
     def calculate_heading(self):
-        self.heading = self.pipe_sensor_imu[-1]["euler"][0]
+        if len(self.pipe_sensor_imu) != 0:
+            self.heading = self.pipe_sensor_imu[-1]["euler"][0]
 
             
 mcqueen = McQueen()
