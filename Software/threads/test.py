@@ -13,8 +13,8 @@ class McQueen:
         self.velocity = 0
         self.heading = 0
         
-        self._current_encoder = 0
-        self._previous_encoder = 0
+        self._current_encoder = None
+        self._previous_encoder = None
 
         logging.info("Initialising threads")
         self.threads_init()
@@ -69,7 +69,8 @@ class McQueen:
     def calculate_velocity(self):
         if len(self.pipe_sensor_encoder) != 0:
             self._current_encoder = self.pipe_sensor_encoder[-1]
-            self.velocity = (self._current_encoder["position"] - self._previous_encoder["position"]) / (self._current_encoder["time"] - self._previous_encoder["time"])
+            if self._previous_encoder != None:
+                self.velocity = (self._current_encoder["position"] - self._previous_encoder["position"]) / (self._current_encoder["time"] - self._previous_encoder["time"])
             self._previous_encoder = self._current_encoder
         
     def calculate_heading(self):
