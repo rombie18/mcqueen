@@ -65,7 +65,6 @@ class EncoderThread(Thread):
             
             logging.info("Starting Encoder")
             while not self.stop_event.is_set():
-                logging.info("Position: " + str(sensor_encoder.getValue()))
                 self.pipe.append({
                     'time': datetime.now(),
                     'position': sensor_encoder.getValue()
