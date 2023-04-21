@@ -21,28 +21,32 @@ class IMUThread(Thread):
         self.stop_event: Event = stop_event
 
     def run(self):
-        logging.getLogger()
-        
-        logging.info("Initialising I2C bus 2...")
-        bus_i2c_2 = I2C(board.SCL_1, board.SDA_1)
-        
-        logging.info("Initialising IMU...")
-        sensor_imu = BNO055_I2C(bus_i2c_2)
-        
-        logging.info("Starting IMU")
-        while not self.stop_event.is_set():
-            self.pipe.append({
-                'time': datetime.now(),
-                'temperature': sensor_imu.temperature,
-                'acceleration': sensor_imu.acceleration,
-                'magnetic': sensor_imu.magnetic,
-                'gyro': sensor_imu.gyro,
-                'euler': sensor_imu.euler,
-                'quaternion': sensor_imu.quaternion,
-                'linear_acceleration': sensor_imu.linear_acceleration,
-                'gravity': sensor_imu.gravity
-            })
-            time.sleep(0.1)
+        try:
+            logging.getLogger()
+            
+            logging.info("Initialising I2C bus 2...")
+            bus_i2c_2 = I2C(board.SCL_1, board.SDA_1)
+            
+            logging.info("Initialising IMU...")
+            sensor_imu = BNO055_I2C(bus_i2c_2)
+            
+            logging.info("Starting IMU")
+            while not self.stop_event.is_set():
+                self.pipe.append({
+                    'time': datetime.now(),
+                    'temperature': sensor_imu.temperature,
+                    'acceleration': sensor_imu.acceleration,
+                    'magnetic': sensor_imu.magnetic,
+                    'gyro': sensor_imu.gyro,
+                    'euler': sensor_imu.euler,
+                    'quaternion': sensor_imu.quaternion,
+                    'linear_acceleration': sensor_imu.linear_acceleration,
+                    'gravity': sensor_imu.gravity
+                })
+                time.sleep(0.1)
+                
+        except Exception as exception:
+            logging.error(exception)
             
 
 class EncoderThread(Thread):
@@ -53,19 +57,23 @@ class EncoderThread(Thread):
         self.stop_event: Event = stop_event
 
     def run(self):
-        logging.getLogger()
-        
-        logging.info("Initialising Encoder...")
-        sensor_encoder = Encoder(board.D17, board.D18)
-        
-        logging.info("Starting Encoder")
-        while not self.stop_event.is_set():
-            logging.info("Position: " + str(sensor_encoder.getValue()))
-            self.pipe.append({
-                'time': datetime.now(),
-                'position': sensor_encoder.getValue()
-            })
-            time.sleep(0.1)
+        try:
+            logging.getLogger()
+            
+            logging.info("Initialising Encoder...")
+            sensor_encoder = Encoder(board.D17, board.D18)
+            
+            logging.info("Starting Encoder")
+            while not self.stop_event.is_set():
+                logging.info("Position: " + str(sensor_encoder.getValue()))
+                self.pipe.append({
+                    'time': datetime.now(),
+                    'position': sensor_encoder.getValue()
+                })
+                time.sleep(0.1)
+                
+        except Exception as exception:
+            logging.error(exception)
             
 class StatsThread(Thread):
     def __init__(self, pipe, stop_event):
@@ -75,12 +83,16 @@ class StatsThread(Thread):
         self.stop_event: Event = stop_event
 
     def run(self):
-        logging.getLogger()
-        
-        logging.info("Starting Stats")
-        with jtop() as jetson:
-            while not self.stop_event.is_set() and jetson.ok():
-                self.pipe.append(jetson.stats)
+        try:
+            logging.getLogger()
+            
+            logging.info("Starting Stats")
+            with jtop() as jetson:
+                while not self.stop_event.is_set() and jetson.ok():
+                    self.pipe.append(jetson.stats)
+                
+        except Exception as exception:
+            logging.error(exception)
                 
 class ControllerThread(Thread):
     def __init__(self, pipe, stop_event):
@@ -90,10 +102,14 @@ class ControllerThread(Thread):
         self.stop_event: Event = stop_event
 
     def run(self):
-        logging.getLogger()
-        
-        logging.info("Starting Controller")
-        run_event_loop(self.__controller_add, self.__controller_remove, self.__controller_process, alive=self.__controller_alive)
+        try:
+            logging.getLogger()
+            
+            logging.info("Starting Controller")
+            run_event_loop(self.__controller_add, self.__controller_remove, self.__controller_process, alive=self.__controller_alive)
+            
+        except Exception as exception:
+            logging.error(exception)
             
     def __controller_add(self, joy):
         data = {
@@ -130,12 +146,16 @@ class ImageProcessingThread(Thread):
         self.stop_event: Event = stop_event
 
     def run(self):
-        logging.getLogger()
-        
-        logging.info("Initialising Image Processing...")
-        pass
-        
-        logging.info("Starting Image Processing")
-        while not self.stop_event.is_set():
-            # Add image processing algorithm here
-            time.sleep(1)
+        try:
+            logging.getLogger()
+            
+            logging.info("Initialising Image Processing...")
+            pass
+            
+            logging.info("Starting Image Processing")
+            while not self.stop_event.is_set():
+                # Add image processing algorithm here
+                time.sleep(1)
+                
+        except Exception as exception:
+            logging.error(exception)
