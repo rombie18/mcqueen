@@ -110,7 +110,7 @@ class Mcqueen:
         thread_producer_sensor_imu = ProducerThread(
             pipe_sensor_imu, self.stop_event, self.handle_produce_sensor_imu, thread_type="TIMED_LOOP", frequency=100)
         thread_producer_sensor_encoder = ProducerThread(
-            pipe_sensor_encoder, self.stop_event, self.handle_produce_sensor_encoder, thread_type="TIMED_LOOP", frequency=100)
+            pipe_sensor_encoder, self.stop_event, self.handle_produce_sensor_encoder, thread_type="TIMED_LOOP", frequency=10)
         thread_producer_sensor_stats = ProducerThread(
             pipe_sensor_stats, self.stop_event, self.handle_produce_sensor_stats, thread_type="TIMED_LOOP", frequency=1)
         thread_producer_pids = ProducerThread(
@@ -119,7 +119,7 @@ class Mcqueen:
         thread_reader_sensor_imu = ReaderThread(
             pipe_sensor_imu, self.stop_event, self.handle_read_sensor_imu, thread_type="TIMED_LOOP", frequency=10)
         thread_reader_sensor_encoder = ReaderThread(
-            pipe_sensor_encoder, self.stop_event, self.handle_read_sensor_encoder, thread_type="TIMED_LOOP", frequency=100)
+            pipe_sensor_encoder, self.stop_event, self.handle_read_sensor_encoder, thread_type="TIMED_LOOP", frequency=10)
 
         thread_consumer_sensor_imu = ConsumerThread(
             pipe_sensor_imu, self.stop_event, self.handle_consume_sensor_imu, thread_type="TIMED_LOOP", frequency=0.1)
@@ -200,8 +200,7 @@ class Mcqueen:
         self.current_position = item["position"] * (8.1/100)
         self.velocity = (self.current_position - self.previous_position) / (1/100)
         self.previous_position = self.current_position
-        print("speed: ", self.velocity)
-        
+        print("speed: ", self.velocity)        
 
     def handle_consume_sensor_imu(self, items):
         filename = "imu.csv"
