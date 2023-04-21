@@ -69,11 +69,11 @@ class McQueen:
         self.motor_pid.sample_time = 0.1
 
         # Image processing
-        #print("Initialising image processing...")
-        #def image_thread():
-        #    call(["python", "process_videocapture.py"])
-        #processThread = threading.Thread(target=image_thread)  # <- note extra ','
-        #processThread.start()
+        print("Initialising image processing...")
+        def image_thread():
+            call(["python", "process_videocapture.py"])
+        processThread = threading.Thread(target=image_thread)  # <- note extra ','
+        processThread.start()
 
         try:
             print("Starting main loop...")
