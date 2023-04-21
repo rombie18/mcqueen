@@ -9,6 +9,9 @@ class McQueen:
         
         logging.getLogger()
         logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(threadName)-16s | %(message)s")
+        
+        self.velocity = 0
+        self.heading = 0
 
         logging.info("Initialising threads")
         self.threads_init()
@@ -19,8 +22,12 @@ class McQueen:
         logging.info("Starting main loop")
         try:
             while True:
-                
+                self.calculate_velocity()
+                self.calculate_heading()
+                print("Heading: " + str(self.heading))
+                print("Velocity: " + str(self.velocity))
                 time.sleep(0.1)
+                
         except KeyboardInterrupt:
             pass
         except Exception as e:
