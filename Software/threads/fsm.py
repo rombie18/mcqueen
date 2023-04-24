@@ -16,7 +16,7 @@ class McQueen():
     def __init__(self):
         self.state = States.INITIALISING
         
-    def states(self):
+    def next_state_logic(self):
         if self.state == States.INITIALISING:
             if self.flag_fault:
                 self.state = States.FAULT
@@ -75,3 +75,44 @@ class McQueen():
             
         if self.state == States.HALTING:
             self.flag_halt
+
+    def output_logic(self):
+        if self.state == States.INITIALISING:
+            # Init sensors
+            pass
+                
+        if self.state == States.IDLE:
+            # Do nothing
+            pass
+                
+        if self.state == States.STARTING:
+            # Throttle up, start improc, start calculations
+            pass
+                
+        if self.state == States.NOMINAL:
+            # Run normal functions
+            pass
+                
+        if self.state == States.DEGRADED:
+            # Limit speed or stop
+            pass
+                
+        if self.state == States.CORRECTING:
+            # Run other improc algoritm
+            pass
+                
+        if self.state == States.RECOVERING:
+            # Do recovering manuever
+            pass
+                
+        if self.state == States.STOPPING:
+            # Throttle down motors, stop image proc
+            pass
+                
+        if self.state == States.FAULT:
+            # Report error and deinit
+            pass
+            
+        if self.state == States.HALTING:
+            # Turn off Jetson Nano
+            pass
