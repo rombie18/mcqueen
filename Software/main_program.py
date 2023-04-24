@@ -15,6 +15,14 @@ from encoder import Encoder
 
 import threading
 from subprocess import call
+import sys
+import cv2
+import numpy as np
+sys.path.append("python-common")
+
+import TIS
+from collections import deque
+
 
 class McQueen:
     # Main methods
@@ -23,6 +31,7 @@ class McQueen:
         self.velocity = 0
         self.heading = 0
         self.stop = False
+        self.start = False
         self.pid_control = False
         self.set_heading = 0
         
@@ -30,6 +39,15 @@ class McQueen:
         self.previous_position = 0
         self.current_time = 0
         self.previous_time = 0
+
+        self.X_lb=0
+        self.Y_lb=0
+        self.X_rb=0
+        self.Y_rb=0
+        self.lower = np.array([150, 100, 20])
+        self.upper = np.array([180, 255, 255])
+        self.h1 = 0
+        self.h2 = 0
 
         # Busses
         print("Initialising busses...")
@@ -70,10 +88,16 @@ class McQueen:
 
         # Image processing
         print("Initialising image processing...")
-        def image_thread():
-            call(["python", "process_videocapture.py"])
-        processThread = threading.Thread(target=image_thread)  # <- note extra ','
-        processThread.start()
+        self.Tis = TIS.TIS()
+        self.Tis.open_device("02320237", 1280, 720, "60/1", TIS.SinkFormats.BGRA, False)
+
+        try:
+            self.Tis.set_property("TriggerMode","Off")
+        except Exception as error:
+            print(error)
+
+        self.Tis.start_pipeline()
+
 
         try:
             print("Starting main loop...")
@@ -92,16 +116,25 @@ class McQueen:
         mngr.start()
 
         while not self.stop:
+            time_start = time.time()
             self.calculate_velocity()
             self.calculate_heading()
+            self.actuator_motor.throttle = 0.2
             if self.pid_control:
                 self.cycle_loop_motor()
                 self.cycle_loop_steering()
-                
+
+            if self.start:
+                self.actuator_servo.angle = self.do_image_proccess()
+
+            time_end = time.time()
+            print(time_end - time_start)
 
     def safe_stop(self):
         self.actuator_motor.throttle = 0
         self.actuator_servo.angle = self.transform_heading_to_angle(0)
+        self.Tis.stop_pipeline()
+        cv2.destroyAllWindows()
 
     # Control loops
 
@@ -113,7 +146,7 @@ class McQueen:
             self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.heading))))
 
     def calculate_velocity(self):
-        self.velocity = 0
+        self.velocity = 0.1
 
     def calculate_heading(self):
         self.heading = self.sensor_imu.euler[0]
@@ -182,7 +215,7 @@ class McQueen:
             if key.keytype == "Button" and key.number == 3 and key.raw_value == 1:
                 # Green triangle button
                 # Start
-                print("Start")
+                self.start = not self.start
 
             if key.keytype == "Hat" and key.number == 0 and key.raw_value == 1:
                 # Left hat up
@@ -213,5 +246,54 @@ class McQueen:
             print("-----------CONTORLLER ERROR-----------")
             print(e)
             print("-----------------CEND-----------------")
+
+    def do_image_proccess(self):
+        angle = 90
+        if self.Tis.snap_image(1):
+            video = self.Tis.get_image()
+
+            hight, width, _ = video.shape #Get resolution
+
+            video_hsv = cv2.cvtColor(video, cv2.COLOR_BGR2HSV) #Converting BGR image to HSV format
+
+            mask_video = cv2.inRange(video_hsv, self.lower, self.upper) # Masking the image to find our color
+            
+            mask_leftBand = mask_video[0:hight, int(250):int(300)] #Crop right band
+            mask_rightBand = mask_video[0:hight, int(width-300):int(width-250)] #crop left band
+
+            mask_contours_leftBand, hierarchy = cv2.findContours(mask_leftBand, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE) #Finding contours in mask image (leftband)
+            mask_contours_rightBand, hierarchy = cv2.findContours(mask_rightBand, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE) #Finding contours in mask image (rightband)
+
+            # Finding position of all contours of the bands
+            if len(mask_contours_leftBand or mask_contours_rightBand) != 0:
+                for i_lb, k_rb in zip(mask_contours_leftBand, mask_contours_rightBand):
+                    if cv2.contourArea(i_lb) > 500:
+                        x1, y1, w1, self.h1 = cv2.boundingRect(i_lb)
+                        X_lb = int(x1+(w1/2)) #calculate center of rectangle
+                        Y_lb = int(y1+(self.h1/2))
+                        cv2.rectangle(video, (x1+250, y1), (x1 + w1+250, y1 + self.h1), (0, 0, 255), 3) #drawing rectangle
+                    
+                    if cv2.contourArea(k_rb) > 500:
+                        x2, y2, w2, self.h2 = cv2.boundingRect(k_rb)
+                        X_rb = int(width-(x2+(w2/2))) #calculate center of rectangle
+                        Y_rb = int(y2+(self.h2/2))
+                        cv2.rectangle(video, ((width-x2-300), y2), (((width-x2-300) + w2), (y2 + self.h2)), (255, 0, 0), 3) #drawing rectangle (formula needed, otherwise it will add it on the left side)
+
+                    
+                diff = 1
+                if self.h2 != 0:
+                    diff = self.h1/self.h2
+                if (diff > 0.9) and (diff < 1.1):
+                    print("Go straight")
+                if diff > 1.1: #h1>h2
+                    norm = (self.h1-self.h2)/self.h1
+                    angle = 90*norm
+                    print("Go right, with angle:", angle)
+                if diff < 0.9: #h1<h2
+                    norm = 1-((self.h2-self.h1)/self.h2)
+                    angle = 90+90*norm
+                    print("Go left, with angle:", angle)
+
+        return angle
 
 mcqueen = McQueen()
