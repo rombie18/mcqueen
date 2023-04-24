@@ -1,8 +1,13 @@
 import time
 import board
 import logging
+import traceback
+import Jetson.GPIO as GPIO
+import os
+import csv
+import copy
 from  datetime import datetime
-from threading import Thread, Event
+from threading import Thread, Event, Lock
 from collections import deque
 from busio import I2C
 from adafruit_bno055 import BNO055_I2C
@@ -12,7 +17,6 @@ from pyjoystick.sdl2 import Key, Joystick, run_event_loop
 from adafruit_motor import servo as MOTOR
 from simple_pid import PID
 from adafruit_pca9685 import PCA9685
-
 
 class IMUThread(Thread):
     def __init__(self, pipe, stop_event):
@@ -47,7 +51,8 @@ class IMUThread(Thread):
                 
         except Exception as exception:
             logging.error(exception)
-            
+            traceback.print_exc()
+            self.stop_event.set()
 
 class EncoderThread(Thread):
     def __init__(self, pipe, stop_event):
@@ -55,13 +60,14 @@ class EncoderThread(Thread):
         
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
+        #self.lock = Lock()
 
     def run(self):
         try:
             logging.getLogger()
             
             logging.info("Initialising Encoder...")
-            sensor_encoder = Encoder(board.D6, board.D12)
+            sensor_encoder = Encoder(board.D22, board.D23)
             
             logging.info("Starting Encoder")
             while not self.stop_event.is_set():
@@ -73,6 +79,8 @@ class EncoderThread(Thread):
                 
         except Exception as exception:
             logging.error(exception)
+            traceback.print_exc()
+            self.stop_event.set()
             
 class StatsThread(Thread):
     def __init__(self, pipe, stop_event):
@@ -92,6 +100,8 @@ class StatsThread(Thread):
                 
         except Exception as exception:
             logging.error(exception)
+            traceback.print_exc()
+            self.stop_event.set()
                 
 class ControllerThread(Thread):
     def __init__(self, pipe, stop_event):
@@ -109,6 +119,8 @@ class ControllerThread(Thread):
             
         except Exception as exception:
             logging.error(exception)
+            traceback.print_exc()
+            self.stop_event.set()
             
     def __controller_add(self, joy):
         data = {
@@ -158,3 +170,56 @@ class ImageProcessingThread(Thread):
                 
         except Exception as exception:
             logging.error(exception)
+            traceback.print_exc()
+            self.stop_event.set()
+
+class DataCollectionThread(Thread):
+    def __init__(self, pipe, stop_event, pipes):
+        super(DataCollectionThread, self).__init__(name="DataCollectionThread")
+        
+        self.pipe: deque = pipe
+        self.stop_event: Event = stop_event
+        self.pipes : dict(deque) = pipes
+
+    def run(self):
+        try:
+            logging.getLogger()
+            
+            logging.info("Initialising Data Collection...")
+            path_base = "/media/mcqueen/MCQUEEN"
+            path_data = "/data/" + datetime.now().strftime("%d%m%Y %H%M%S")
+            self.path = path_base + path_data
+            if not os.path.exists(path_base):
+                logging.warning("USB drive not detected, data collection disabled!")
+                return
+            if not os.path.exists(self.path):
+                os.makedirs(self.path)
+            
+            logging.info("Starting Data Collection")
+            while not self.stop_event.is_set():
+                self.__save()
+                time.sleep(10)
+
+            # Save remaining pipe contents on quit
+            self.__save()
+                
+        except Exception as exception:
+            logging.error(exception)
+            traceback.print_exc()
+            self.stop_event.set()
+
+    def __save(self):
+        # Make local copy to prevent locked pipes
+        pipes = copy.deepcopy(self.pipes)
+        # Clear pipes
+        for pipe in self.pipes.values():
+            pipe.clear()
+        # Save local copy to file
+        for name, pipe in pipes.items():
+            if len(pipe) > 0:
+                filename = name + ".csv"
+                with open(self.path + "/" + filename, 'w') as file:
+                    writer = csv.writer(file, delimiter="|")
+                    writer.writerow(list(pipe[0].keys()))
+                    for item in pipe:
+                        writer.writerow(item.values())
