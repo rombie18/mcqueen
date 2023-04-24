@@ -29,7 +29,7 @@ class McQueen:
                 self.calculate_heading()
                 print("Heading: " + str(self.heading))
                 print("Velocity: " + str(self.velocity))
-                time.sleep(0.5)
+                time.sleep(0.1)
                 
         except KeyboardInterrupt:
             pass
@@ -38,6 +38,7 @@ class McQueen:
         finally:
             logging.info("Signaling threads to stop")
             self.threads_stop()
+            GPIO.cleanup()
 
 
     def threads_init(self):
@@ -71,7 +72,7 @@ class McQueen:
         if len(self.pipe_sensor_encoder) > 2:
             self._current_encoder = self.pipe_sensor_encoder[-1]
             if self._previous_encoder != None:
-                self.velocity = (self._current_encoder["position"] - self._previous_encoder["position"]) * 0.30566 / (self._current_encoder["time"] - self._previous_encoder["time"]).total_seconds()
+                self.velocity = -(self._current_encoder["position"] - self._previous_encoder["position"]) * 0.30566 / (self._current_encoder["time"] - self._previous_encoder["time"]).total_seconds()
             self._previous_encoder = self._current_encoder
         
     def calculate_heading(self):
