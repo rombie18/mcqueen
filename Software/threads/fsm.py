@@ -16,7 +16,6 @@ class McQueen():
     def __init__(self):
         self.state = States.INITIALISING
         
-        
     def states(self):
         if self.state == States.INITIALISING:
             if self.flag_fault:

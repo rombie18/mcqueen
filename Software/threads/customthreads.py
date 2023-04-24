@@ -52,7 +52,8 @@ class IMUThread(Thread):
         except Exception as exception:
             logging.error(exception)
             traceback.print_exc()
-            self.stop_event.set()
+        finally:
+            logging.info("Stopped IMU")
 
 class EncoderThread(Thread):
     def __init__(self, pipe, stop_event):
@@ -80,7 +81,8 @@ class EncoderThread(Thread):
         except Exception as exception:
             logging.error(exception)
             traceback.print_exc()
-            self.stop_event.set()
+        finally:
+            logging.info("Stopped Encoder")
             
 class StatsThread(Thread):
     def __init__(self, pipe, stop_event):
@@ -101,7 +103,8 @@ class StatsThread(Thread):
         except Exception as exception:
             logging.error(exception)
             traceback.print_exc()
-            self.stop_event.set()
+        finally:
+            logging.info("Stopped Stats")
                 
 class ControllerThread(Thread):
     def __init__(self, pipe, stop_event):
@@ -120,7 +123,6 @@ class ControllerThread(Thread):
         except Exception as exception:
             logging.error(exception)
             traceback.print_exc()
-            self.stop_event.set()
             
     def __controller_add(self, joy):
         data = {
@@ -171,7 +173,8 @@ class ImageProcessingThread(Thread):
         except Exception as exception:
             logging.error(exception)
             traceback.print_exc()
-            self.stop_event.set()
+        finally:
+            logging.info("Stopped Image Processing")
 
 class DataCollectionThread(Thread):
     def __init__(self, pipe, stop_event, pipes):
@@ -206,7 +209,8 @@ class DataCollectionThread(Thread):
         except Exception as exception:
             logging.error(exception)
             traceback.print_exc()
-            self.stop_event.set()
+        finally:
+            logging.info("Stopped Data Collection")
 
     def __save(self):
         # Make local copy to prevent locked pipes
