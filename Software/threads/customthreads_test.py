@@ -23,29 +23,30 @@ class IMUThread(Thread):
         super(IMUThread, self).__init__(name="IMUThread")        
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
+        
+        logging.getLogger()
+        
+        logging.info("Initialising I2C bus 2...")
+        bus_i2c_2 = I2C(board.SCL_1, board.SDA_1)
+        
+        logging.info("Initialising IMU...")
+        self.sensor_imu = BNO055_I2C(bus_i2c_2)
+        
 
     def run(self):
         try:
-            logging.getLogger()
-            
-            logging.info("Initialising I2C bus 2...")
-            bus_i2c_2 = I2C(board.SCL_1, board.SDA_1)
-            
-            logging.info("Initialising IMU...")
-            sensor_imu = BNO055_I2C(bus_i2c_2)
-            
             logging.info("Starting IMU")
             while not self.stop_event.is_set():
                 self.pipe.append({
                     'time': datetime.now(),
-                    'temperature': sensor_imu.temperature,
-                    'acceleration': sensor_imu.acceleration,
-                    'magnetic': sensor_imu.magnetic,
-                    'gyro': sensor_imu.gyro,
-                    'euler': sensor_imu.euler,
-                    'quaternion': sensor_imu.quaternion,
-                    'linear_acceleration': sensor_imu.linear_acceleration,
-                    'gravity': sensor_imu.gravity
+                    'temperature': self.sensor_imu.temperature,
+                    'acceleration': self.sensor_imu.acceleration,
+                    'magnetic': self.sensor_imu.magnetic,
+                    'gyro': self.sensor_imu.gyro,
+                    'euler': self.sensor_imu.euler,
+                    'quaternion': self.sensor_imu.quaternion,
+                    'linear_acceleration': self.sensor_imu.linear_acceleration,
+                    'gravity': self.sensor_imu.gravity
                 })
                 time.sleep(0.1)
                 
@@ -62,20 +63,19 @@ class EncoderThread(Thread):
         
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
-        #self.lock = Lock()
+        
+        logging.getLogger()
+        
+        logging.info("Initialising Encoder...")
+        self.sensor_encoder = Encoder(board.D22, board.D23)
 
     def run(self):
         try:
-            logging.getLogger()
-            
-            logging.info("Initialising Encoder...")
-            sensor_encoder = Encoder(board.D22, board.D23)
-            
             logging.info("Starting Encoder")
             while not self.stop_event.is_set():
                 self.pipe.append({
                     'time': datetime.now(),
-                    'position': sensor_encoder.getValue()
+                    'position': self.sensor_encoder.getValue()
                 })
                 time.sleep(0.1)
                 
@@ -92,11 +92,11 @@ class StatsThread(Thread):
         
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
+        
+        logging.getLogger()
 
     def run(self):
         try:
-            logging.getLogger()
-            
             logging.info("Starting Stats")
             with jtop() as jetson:
                 while not self.stop_event.is_set() and jetson.ok():
@@ -115,11 +115,11 @@ class ControllerThread(Thread):
         
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
+        
+        logging.getLogger()
 
     def run(self):
-        try:
-            logging.getLogger()
-            
+        try:           
             logging.info("Starting Controller")
             run_event_loop(self.__controller_add, self.__controller_remove, self.__controller_process, alive=self.__controller_alive)
             
@@ -161,14 +161,14 @@ class ImageProcessingThread(Thread):
         
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
+        
+        logging.getLogger()
+            
+        logging.info("Initialising Image Processing...")
+        pass
 
     def run(self):
         try:
-            logging.getLogger()
-            
-            logging.info("Initialising Image Processing...")
-            pass
-            
             logging.info("Starting Image Processing")
             while not self.stop_event.is_set():
                 # Add image processing algorithm here
@@ -188,21 +188,21 @@ class DataCollectionThread(Thread):
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
         self.pipes : dict(deque) = pipes
+        
+        logging.getLogger()
+        
+        logging.info("Initialising Data Collection...")
+        path_base = "/media/mcqueen/MCQUEEN"
+        path_data = "/data/" + datetime.now().strftime("%d%m%Y %H%M%S")
+        self.path = path_base + path_data
+        if not os.path.exists(path_base):
+            logging.warning("USB drive not detected, data collection disabled!")
+            return
+        if not os.path.exists(self.path):
+            os.makedirs(self.path)
 
     def run(self):
         try:
-            logging.getLogger()
-            
-            logging.info("Initialising Data Collection...")
-            path_base = "/media/mcqueen/MCQUEEN"
-            path_data = "/data/" + datetime.now().strftime("%d%m%Y %H%M%S")
-            self.path = path_base + path_data
-            if not os.path.exists(path_base):
-                logging.warning("USB drive not detected, data collection disabled!")
-                return
-            if not os.path.exists(self.path):
-                os.makedirs(self.path)
-            
             logging.info("Starting Data Collection")
             while not self.stop_event.is_set():
                 self.__save()
