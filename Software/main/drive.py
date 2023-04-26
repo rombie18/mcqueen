@@ -1,6 +1,6 @@
 import sys
-sys.path.append("../libs/encoder")
-sys.path.append("../libs/tis")
+sys.path.append("/home/mcqueen/mcqueen/Software/libs/encoder")
+sys.path.append("/home/mcqueen/mcqueen/Software/libs/tis")
 
 import board
 import time
