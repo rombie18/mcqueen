@@ -7,6 +7,7 @@ import time
 import json
 import cv2
 import numpy as np
+import signal
 
 from simple_pid import PID
 from busio import I2C
@@ -98,7 +99,10 @@ class McQueen:
             print(error)
 
         self.Tis.start_pipeline()
-
+        
+        # Init termination handlers
+        signal.signal(signal.SIGINT, self.safe_stop)
+        signal.signal(signal.SIGTERM, self.safe_stop)
 
         try:
             print("Starting main loop...")
@@ -131,6 +135,7 @@ class McQueen:
             print(time_end - time_start)
 
     def safe_stop(self):
+        self.stop = True
         self.actuator_motor.throttle = 0
         self.actuator_servo.angle = self.transform_heading_to_angle(0)
         self.Tis.stop_pipeline()
