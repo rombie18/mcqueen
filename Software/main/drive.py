@@ -1,5 +1,6 @@
 import sys
-sys.path.append("../libs")
+sys.path.append("../libs/encoder")
+sys.path.append("../libs/tis")
 
 import board
 import time
@@ -15,8 +16,8 @@ from adafruit_motor import servo as MOTOR
 import pyjoystick
 from pyjoystick.sdl2 import run_event_loop
 
-from encoder.encoder import Encoder
-from tis.TIS import TIS
+from encoder import Encoder
+from tis import TIS
 
 
 class McQueen:
