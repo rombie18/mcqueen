@@ -87,7 +87,7 @@ class McQueen:
         self.Tis = TIS()
         self.Tis.open_device("02320237", 1280, 720, "60/1", SinkFormats.BGRA, False)
 
-        with open('camera_properties.json', 'r') as file:
+        with open('/home/mcqueen/mcqueen/Software/main/camera_properties.json', 'r') as file:
             data = json.load(file)
             for key, item in data.items():
                 self.Tis.set_property(key, item)
