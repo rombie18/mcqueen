@@ -5,5 +5,6 @@ It will be executed when the robot starts up, and will be attempted to restart i
 Please run other files or do some simple logic below to start the appropriate program(s).
 """
 
-with open("main/drive.py") as file:
-    exec(file.read())
+import os
+
+os.system("main/drive.py")
