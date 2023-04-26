@@ -6,19 +6,6 @@
 
 A piece of python software to control an autonomous rc car with camera vision and odometry.
 
-## Task list
-
-- [x] Start hotspot on boot
-- [ ] Auto pull repo on internet available
-- [ ] Reorganise program structure
-- [ ] Add support for control with PS4 remote
-- [ ] Apply basic camera vision
-- [ ] Add encoder measurement
-- [ ] Think out algorithm for lane following/control
-- [ ] Optimize and debug
-- [ ] (Combine camera/imu/encoder measurements for position estimation)
----
-
 ## Installation
 
 Please follow the steps below to install the software on your Jetson Nano.

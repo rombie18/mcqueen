@@ -7,22 +7,28 @@ import os
 import csv
 import copy
 from  datetime import datetime
-from threading import Thread, Event, Lock
+from threading import Thread, Event
 from collections import deque
 from busio import I2C
 from adafruit_bno055 import BNO055_I2C
-from encoder import Encoder
-from jtop import jtop
-from pyjoystick.sdl2 import Key, Joystick, run_event_loop
-from adafruit_motor import servo as MOTOR
-from simple_pid import PID
 from adafruit_pca9685 import PCA9685
+from adafruit_motor import servo as MOTOR
+from pyjoystick.sdl2 import Key, Joystick, run_event_loop
+from jtop import jtop
+from simple_pid import PID
+
+import sys
+sys.path.append("../libs")
+from encoder.encoder import Encoder
 
 class IMUThread(Thread):
-    def __init__(self, pipe, stop_event):
-        super(IMUThread, self).__init__(name="IMUThread")        
+    def __init__(self, pipe, stop_event, init_event, pause_event):
+        super(IMUThread, self).__init__(name="IMUThread")
+             
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
+        self.init_event: Event = init_event
+        self.pause_event: Event = pause_event
 
     def run(self):
         try:
@@ -34,8 +40,14 @@ class IMUThread(Thread):
             logging.info("Initialising IMU...")
             sensor_imu = BNO055_I2C(bus_i2c_2)
             
+            self.init_event.set()
+            
             logging.info("Starting IMU")
             while not self.stop_event.is_set():
+                if self.pause_event.is_set():
+                    time.sleep(0.5)
+                    continue
+                
                 self.pipe.append({
                     'time': datetime.now(),
                     'temperature': sensor_imu.temperature,
@@ -57,12 +69,13 @@ class IMUThread(Thread):
             logging.info("Stopped IMU")
 
 class EncoderThread(Thread):
-    def __init__(self, pipe, stop_event):
+    def __init__(self, pipe, stop_event, init_event, pause_event):
         super(EncoderThread, self).__init__(name="EncoderThread")
         
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
-        #self.lock = Lock()
+        self.init_event: Event = init_event
+        self.pause_event: Event = pause_event
 
     def run(self):
         try:
@@ -70,9 +83,14 @@ class EncoderThread(Thread):
             
             logging.info("Initialising Encoder...")
             sensor_encoder = Encoder(board.D22, board.D23)
+            self.init_event.set()
             
             logging.info("Starting Encoder")
             while not self.stop_event.is_set():
+                if self.pause_event.is_set():
+                    time.sleep(0.5)
+                    continue
+                
                 self.pipe.append({
                     'time': datetime.now(),
                     'position': sensor_encoder.getValue()
@@ -87,19 +105,28 @@ class EncoderThread(Thread):
             logging.info("Stopped Encoder")
             
 class StatsThread(Thread):
-    def __init__(self, pipe, stop_event):
+    def __init__(self, pipe, stop_event, init_event, pause_event):
         super(StatsThread, self).__init__(name="StatsThread")
         
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
+        self.init_event: Event = init_event
+        self.pause_event: Event = pause_event
 
     def run(self):
         try:
             logging.getLogger()
             
+            logging.info("Initialising Stats...")
+            self.init_event.set()
+            
             logging.info("Starting Stats")
             with jtop() as jetson:
                 while not self.stop_event.is_set() and jetson.ok():
+                    if self.pause_event.is_set():
+                        time.sleep(0.5)
+                        continue
+                
                     self.pipe.append(jetson.stats)
                 
         except Exception as exception:
@@ -110,15 +137,19 @@ class StatsThread(Thread):
             logging.info("Stopped Stats")
                 
 class ControllerThread(Thread):
-    def __init__(self, pipe, stop_event):
+    def __init__(self, pipe, stop_event, init_event):
         super(ControllerThread, self).__init__(name="ControllerThread")
         
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
+        self.init_event: Event = init_event
 
     def run(self):
         try:
             logging.getLogger()
+            
+            logging.info("Initialising Controller...")
+            self.init_event.set()
             
             logging.info("Starting Controller")
             run_event_loop(self.__controller_add, self.__controller_remove, self.__controller_process, alive=self.__controller_alive)
@@ -156,21 +187,27 @@ class ControllerThread(Thread):
         return self.stop_event.is_set()
         
 class ImageProcessingThread(Thread):
-    def __init__(self, pipe, stop_event):
+    def __init__(self, pipe, stop_event, init_event, pause_event):
         super(ImageProcessingThread, self).__init__(name="ImageProcessingThread")
         
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
+        self.init_event: Event = init_event
+        self.pause_event: Event = pause_event
 
     def run(self):
         try:
             logging.getLogger()
             
             logging.info("Initialising Image Processing...")
-            pass
+            self.init_event.set()
             
             logging.info("Starting Image Processing")
             while not self.stop_event.is_set():
+                if self.pause_event.is_set():
+                    time.sleep(0.5)
+                    continue
+                
                 # Add image processing algorithm here
                 time.sleep(1)
                 
@@ -182,11 +219,13 @@ class ImageProcessingThread(Thread):
             logging.info("Stopped Image Processing")
 
 class DataCollectionThread(Thread):
-    def __init__(self, pipe, stop_event, pipes):
+    def __init__(self, pipe, stop_event, init_event, pause_event, pipes):
         super(DataCollectionThread, self).__init__(name="DataCollectionThread")
         
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
+        self.init_event: Event = init_event
+        self.pause_event: Event = pause_event
         self.pipes : dict(deque) = pipes
 
     def run(self):
@@ -203,8 +242,14 @@ class DataCollectionThread(Thread):
             if not os.path.exists(self.path):
                 os.makedirs(self.path)
             
+            self.init_event.set()
+            
             logging.info("Starting Data Collection")
             while not self.stop_event.is_set():
+                if self.pause_event.is_set():
+                    time.sleep(0.5)
+                    continue
+                
                 self.__save()
                 time.sleep(10)
 
