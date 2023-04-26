@@ -1,5 +1,5 @@
 import sys
-sys.path.append("../libs")
+sys.path.append("/home/mcqueen/mcqueen/Software/libs/encoder")
 
 import board
 import time
@@ -10,7 +10,7 @@ from adafruit_bno055 import BNO055_I2C
 from adafruit_pca9685 import PCA9685
 from adafruit_motor import servo as MOTOR
 
-from encoder.encoder import Encoder
+from encoder import Encoder
 
 tests = [
   inquirer.List('tests',

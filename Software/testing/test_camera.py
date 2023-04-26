@@ -1,9 +1,8 @@
 import sys
-sys.path.append("../libs")
+sys.path.append("/home/mcqueen/mcqueen/Software/libs/tis")
 
 import time
 import json
-import sys
 
 from tis import TIS
 

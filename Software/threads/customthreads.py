@@ -1,5 +1,6 @@
 import sys
-sys.path.append("../libs")
+sys.path.append("/home/mcqueen/mcqueen/Software/libs/encoder")
+sys.path.append("/home/mcqueen/mcqueen/Software/libs/tis")
 
 import time
 import board
@@ -17,7 +18,7 @@ from adafruit_bno055 import BNO055_I2C
 from pyjoystick.sdl2 import run_event_loop
 from jtop import jtop
 
-from encoder.encoder import Encoder
+from encoder import Encoder
 
 class IMUThread(Thread):
     def __init__(self, pipe, stop_event, init_event, pause_event):

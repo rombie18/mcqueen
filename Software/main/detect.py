@@ -1,9 +1,9 @@
 import sys
-sys.path.append("../libs")
+sys.path.append("/home/mcqueen/mcqueen/Software/libs/lane_detection")
 
 import cv2
 
-from lane_detection.lane import Lane
+from lane import Lane
 
 filename = 'color_corr.png'
 
