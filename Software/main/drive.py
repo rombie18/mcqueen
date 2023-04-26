@@ -84,7 +84,7 @@ class McQueen:
 
         # Image processing
         print("Initialising image processing...")
-        self.Tis = TIS.TIS()
+        self.Tis = TIS()
         self.Tis.open_device("02320237", 1280, 720, "60/1", TIS.SinkFormats.BGRA, True)
 
         with open('camera_properties.json', 'r') as file:

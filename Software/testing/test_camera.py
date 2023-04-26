@@ -9,7 +9,7 @@ from tis import TIS
 
 # Image processing
 print("Initialising image processing...")
-Tis = TIS.TIS()
+Tis = TIS()
 Tis.open_device("02320237", 1280, 720, "60/1", TIS.SinkFormats.BGRA, True)
 Tis.start_pipeline()
 
