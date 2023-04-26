@@ -5,7 +5,7 @@ import cv2
 
 from lane import Lane
 
-filename = 'color_corr.png'
+filename = '/home/mcqueen/mcqueen/Software/images/color_corr.png'
 
 def main():
      
