@@ -1,24 +1,22 @@
+import sys
+sys.path.append("../libs")
+
 import time
 import board
 import logging
 import traceback
-import Jetson.GPIO as GPIO
 import os
 import csv
 import copy
+
 from  datetime import datetime
 from threading import Thread, Event
 from collections import deque
 from busio import I2C
 from adafruit_bno055 import BNO055_I2C
-from adafruit_pca9685 import PCA9685
-from adafruit_motor import servo as MOTOR
-from pyjoystick.sdl2 import Key, Joystick, run_event_loop
+from pyjoystick.sdl2 import run_event_loop
 from jtop import jtop
-from simple_pid import PID
 
-import sys
-sys.path.append("../libs")
 from encoder.encoder import Encoder
 
 class IMUThread(Thread):

@@ -1,8 +1,10 @@
 import time
 import logging
 import Jetson.GPIO as GPIO
+
 from collections import deque
 from threading import Event
+
 from customthreads import IMUThread, EncoderThread, StatsThread, ControllerThread, ImageProcessingThread, DataCollectionThread
 
 class McQueen:

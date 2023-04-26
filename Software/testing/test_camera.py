@@ -1,27 +1,12 @@
-import board
-import time
-import math
-import json
-
-from simple_pid import PID
-from busio import I2C
-# from rotaryio import IncrementalEncoder
-from adafruit_bno055 import BNO055_I2C
-from adafruit_pca9685 import PCA9685
-from adafruit_motor import servo as MOTOR
-
-import pyjoystick
-from pyjoystick.sdl2 import Key, Joystick, run_event_loop
-from encoder import Encoder
-
-import threading
-from subprocess import call
 import sys
-import cv2
-import numpy as np
-sys.path.append("python-common")
+sys.path.append("../libs")
 
-import TIS
+import time
+import json
+import sys
+
+from tis import TIS
+
 
 # Image processing
 print("Initialising image processing...")

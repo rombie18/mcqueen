@@ -1,9 +1,9 @@
+import sys
 sys.path.append("../libs")
 
 import board
 import time
 import json
-import sys
 import cv2
 import numpy as np
 
