@@ -7,4 +7,4 @@ Please run other files or do some simple logic below to start the appropriate pr
 
 import os
 
-os.system("main/drive.py")
+os.system("python main/drive.py")
