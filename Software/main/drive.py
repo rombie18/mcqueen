@@ -17,7 +17,7 @@ import pyjoystick
 from pyjoystick.sdl2 import run_event_loop
 
 from encoder import Encoder
-from tis import TIS
+from tis import TIS, SinkFormats
 
 
 class McQueen:
@@ -85,7 +85,7 @@ class McQueen:
         # Image processing
         print("Initialising image processing...")
         self.Tis = TIS()
-        self.Tis.open_device("02320237", 1280, 720, "60/1", TIS.SinkFormats.BGRA, True)
+        self.Tis.open_device("02320237", 1280, 720, "60/1", SinkFormats.BGRA, False)
 
         with open('camera_properties.json', 'r') as file:
             data = json.load(file)
