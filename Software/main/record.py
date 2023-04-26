@@ -92,7 +92,7 @@ def main():
 
     new_state = Gst.Structure.new_empty("tcam")
 
-    with open('camera_properties.json', 'r') as file:
+    with open('/home/mcqueen/mcqueen/Software/main/camera_properties.json', 'r') as file:
         data = json.load(file)
 
         for key, item in data.items():
