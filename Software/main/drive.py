@@ -12,10 +12,11 @@ from busio import I2C
 from adafruit_bno055 import BNO055_I2C
 from adafruit_pca9685 import PCA9685
 from adafruit_motor import servo as MOTOR
-from pyjoystick.sdl2 import run_event_loop, ThreadEventManager
+import pyjoystick
+from pyjoystick.sdl2 import run_event_loop
 
 from encoder.encoder import Encoder
-import tis.TIS
+from tis.TIS import TIS
 
 
 class McQueen:
@@ -111,7 +112,7 @@ class McQueen:
 
     def main_loop(self):
 
-        mngr = ThreadEventManager(event_loop=run_event_loop, add_joystick=self.controller_add, remove_joystick=self.controller_remove, handle_key_event=self.controller_process)
+        mngr = pyjoystick.ThreadEventManager(event_loop=run_event_loop, add_joystick=self.controller_add, remove_joystick=self.controller_remove, handle_key_event=self.controller_process)
         mngr.start()
 
         while not self.stop:
