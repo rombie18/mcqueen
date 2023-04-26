@@ -5,7 +5,7 @@ After=systemd-user-sessions.service
 After=network-online.target
 
 [Service]
-ExecStart=/home/mcqueen/mcqueen/Software/mcqueen-service.sh
+ExecStart=/home/mcqueen/mcqueen/Software/main.sh
 Type=simple
 Restart=always
 
