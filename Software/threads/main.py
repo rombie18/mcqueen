@@ -5,6 +5,7 @@ import traceback
 import os
 import board
 import Jetson.GPIO as GPIO
+import pyjoystick
 
 from collections import deque
 from threading import Event
@@ -12,6 +13,7 @@ from adafruit_pca9685 import PCA9685
 from adafruit_motor import servo as MOTOR
 from busio import I2C
 from simple_pid import PID
+from pyjoystick.sdl2 import run_event_loop
 
 from customthreads import IMUThread, EncoderThread, StatsThread, ControllerThread, ImageProcessingThread, DataCollectionThread
 
@@ -73,6 +75,9 @@ class McQueen:
         logging.info("Starting all threads")
         self.threads_start()
         
+        logging.info("Starting controller")
+        mngr = pyjoystick.ThreadEventManager(event_loop=run_event_loop, add_joystick=self.controller_add, remove_joystick=self.controller_remove, handle_key_event=self.controller_process)
+        mngr.start()
         
         logging.info("Starting main loop")
         try:
