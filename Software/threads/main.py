@@ -1,6 +1,7 @@
 import time
 import logging
 import signal
+import traceback
 import Jetson.GPIO as GPIO
 
 from collections import deque
@@ -13,6 +14,8 @@ class McQueen:
         
         logging.getLogger()
         logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(threadName)s | %(message)s")
+        
+        self.state = "INITIALISING"
         
         self.flag_initialised = False
         self.flag_fault = False
@@ -38,14 +41,18 @@ class McQueen:
         logging.info("Starting main loop")
         try:
             while True:
-                # Do calculations
-                self.process_calculations()
                 self.process_flags()
                 
-                # Start all thread calulations when everything is initialised
-                if self.flag_initialised:
-                    logging.info("Releasing all threads.")
-                    self.pause_event.clear()
+                #TODO improve state machine
+                if self.state == "INITIALISING":
+                    # Start all thread calulations when everything is initialised
+                    if self.flag_initialised:
+                        logging.info("Releasing all threads.")
+                        self.pause_event.clear()
+                        self.state = "RUNNING"
+                        
+                if self.state == "RUNNING":
+                    self.process_calculations()
                     
                 time.sleep(0.1)
                 
@@ -53,6 +60,7 @@ class McQueen:
             pass
         except Exception as e:
             logging.fatal(e)
+            traceback.print_exc()
         finally:
             logging.info("Signaling threads to stop")
             self.threads_stop()
