@@ -85,7 +85,7 @@ class McQueen:
         self.threads.append(IMUThread(self.pipe_imu, self.stop_event, self.init_event_imu, self.pause_event))
         self.threads.append(EncoderThread(self.pipe_encoder, self.stop_event, self.init_event_encoder, self.pause_event))
         self.threads.append(StatsThread(self.pipe_stats, self.stop_event, self.init_event_stats, self.pause_event))
-        self.threads.append(ControllerThread(self.pipe_controller, self.stop_event, self.init_event_controller, self.pause_event))
+        self.threads.append(ControllerThread(self.pipe_controller, self.stop_event, self.init_event_controller))
         self.threads.append(ImageProcessingThread(self.pipe_imageprocessing, self.stop_event, self.init_event_imageprocessing, self.pause_event))
         self.threads.append(DataCollectionThread(None, self.stop_event, self.init_event_datacollection, self.pause_event, self.pipes))
         
