@@ -135,6 +135,8 @@ class McQueen:
         if len(self.pipe_encoder) > 2:
             self._current_encoder = self.pipe_encoder[-1]
             if self._previous_encoder != None:
+                print(self._current_encoder["time_epoch"])
+                print(self._previous_encoder["time_epoch"])
                 self.velocity = -(self._current_encoder["position"] - self._previous_encoder["position"]) * 3.0566 / (self._current_encoder["time_epoch"] - self._previous_encoder["time_epoch"]) / 1000
             self._previous_encoder = self._current_encoder
         
