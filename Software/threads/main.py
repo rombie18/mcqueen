@@ -31,7 +31,9 @@ class McQueen:
         self.flag_pause = False
         
         self.velocity = 0
+        self.set_velocity = 0
         self.heading = 0
+        self.set_heading = 0
         
         self._current_encoder = None
         self._previous_encoder = None
