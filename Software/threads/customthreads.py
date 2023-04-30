@@ -12,6 +12,7 @@ import csv
 import copy
 import cv2
 import json
+import numpy
 
 from  datetime import datetime
 from threading import Thread, Event
@@ -239,6 +240,9 @@ class ImageProcessingThread(Thread):
                     
                     # Perform thresholding to isolate lane lines
                     lane_line_markings = lane_obj.get_line_markings()
+                    # If there are less than 50 'lane' pixels detected, skip calculations
+                    if numpy.sum(lane_line_markings == 255) < 50:
+                        continue
                     
                     # Plot the region of interest on the image
                     lane_obj.plot_roi(plot=False)
