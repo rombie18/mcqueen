@@ -59,7 +59,7 @@ def main():
   new_filename = new_filename + '_thresholded.jpg'     
      
   # Save the new image in the working directory
-  #cv2.imwrite(new_filename, lane_line_markings)
+  cv2.imwrite(new_filename, lane_line_markings)
  
   # Display the image 
   #cv2.imshow("Image", lane_line_markings)
