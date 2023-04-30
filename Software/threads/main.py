@@ -98,9 +98,16 @@ class McQueen:
             logging.fatal(e)
             traceback.print_exc()
         finally:
-            logging.info("Signaling threads to stop")
-            self.threads_stop()
-            GPIO.cleanup()
+            self.safe_stop()
+            
+            
+    def safe_stop(self):
+        logging.info("Safe stop")
+        self.threads_stop()
+        self.flag_stop = True
+        self.actuator_motor.throttle = 0
+        self.actuator_servo.angle = self.transform_heading_to_angle(0)
+        GPIO.cleanup()
 
 
     ### Control loops ###
