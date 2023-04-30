@@ -1,5 +1,6 @@
 import time
 import logging
+import signal
 import Jetson.GPIO as GPIO
 
 from collections import deque
@@ -23,6 +24,10 @@ class McQueen:
         
         self._current_encoder = None
         self._previous_encoder = None
+        
+        # Init termination handlers
+        signal.signal(signal.SIGINT, self.safe_stop)
+        signal.signal(signal.SIGTERM, self.safe_stop)
 
         logging.info("Initialising threads")
         self.threads_init()
@@ -45,6 +50,11 @@ class McQueen:
             logging.info("Signaling threads to stop")
             self.threads_stop()
             GPIO.cleanup()
+            
+    
+    ### Functions ###
+    def safe_stop(self):
+        self.stop_event.set()
 
 
     ### Threading ###
