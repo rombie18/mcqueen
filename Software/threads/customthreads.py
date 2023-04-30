@@ -204,20 +204,20 @@ class ImageProcessingThread(Thread):
             logging.getLogger()
             
             logging.info("Initialising Image Processing...")
-            self.Tis = TIS()
-            self.Tis.open_device("02320237", 1280, 720, "60/1", SinkFormats.BGRA, False)
+            camera = TIS()
+            camera.open_device("02320237", 1280, 720, "60/1", SinkFormats.BGRA, False)
 
             with open('/home/mcqueen/mcqueen/Software/main/camera_properties.json', 'r') as file:
                 data = json.load(file)
                 for key, item in data.items():
-                    self.Tis.set_property(key, item)
+                    camera.set_property(key, item)
 
             try:
-                self.Tis.set_property("TriggerMode","Off")
+                camera.set_property("TriggerMode","Off")
             except Exception as error:
                 print(error)
 
-            self.Tis.start_pipeline()
+            camera.start_pipeline()
             self.init_event.set()
             
             logging.info("Starting Image Processing")
@@ -226,9 +226,9 @@ class ImageProcessingThread(Thread):
                     time.sleep(0.5)
                     continue
                 
-                if self.Tis.snap_image(1):                                        
+                if camera.snap_image(1):                                        
                     # Load a frame (or image)
-                    original_frame = self.Tis.get_image()
+                    original_frame = camera.get_image()
                     
                     # Discard unwanted part of image
                     original_height, original_width, original_channels = original_frame.shape
