@@ -140,10 +140,9 @@ class McQueen:
         self.__flag_initialised()
 
     def __flag_initialised(self):
+        print(self.init_events)
         for init_event in self.init_events:
-            print("d")
             if not init_event.is_set():
-                print(init_event)
                 self.flag_initialised = False
                 return
         self.flag_initialised = True
