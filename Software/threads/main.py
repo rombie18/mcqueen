@@ -143,12 +143,15 @@ class McQueen:
         self.__flag_initialised()
 
     def __flag_initialised(self):
+        print("--")
         for init_event in self.init_events:
             print(init_event)
             if not init_event.is_set():
                 self.flag_initialised = False
+                print("f")
                 return
         self.flag_initialised = True
+        print("t")
 
             
 mcqueen = McQueen()
