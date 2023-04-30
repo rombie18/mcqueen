@@ -3,7 +3,7 @@ sys.path.append("/home/mcqueen/mcqueen/Software/libs/lane_detection")
 
 import cv2
 
-from lane_detection.lane import Lane
+from lane import Lane
 
 filename = '/home/mcqueen/mcqueen/Software/images/color_corr.png'
 
