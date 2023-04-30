@@ -44,6 +44,7 @@ class McQueen:
                 
                 # Start all thread calulations when everything is initialised
                 if self.flag_initialised:
+                    logging.info("Releasing all threads.")
                     self.pause_event.clear()
                     
                 time.sleep(0.1)

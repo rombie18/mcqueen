@@ -47,7 +47,7 @@ class IMUThread(Thread):
             
             self.init_event.set()
             
-            logging.info("Starting IMU")
+            logging.info("IMU initialised.")
             while not self.stop_event.is_set():
                 if self.pause_event.is_set():
                     time.sleep(0.5)
@@ -90,7 +90,7 @@ class EncoderThread(Thread):
             sensor_encoder = Encoder(board.D22, board.D23)
             self.init_event.set()
             
-            logging.info("Starting Encoder")
+            logging.info("Encoder initialised.")
             while not self.stop_event.is_set():
                 if self.pause_event.is_set():
                     time.sleep(0.5)
@@ -125,7 +125,7 @@ class StatsThread(Thread):
             logging.info("Initialising Stats...")
             self.init_event.set()
             
-            logging.info("Starting Stats")
+            logging.info("Stats initialised.")
             with jtop() as jetson:
                 while not self.stop_event.is_set() and jetson.ok():
                     if self.pause_event.is_set():
@@ -156,7 +156,7 @@ class ControllerThread(Thread):
             logging.info("Initialising Controller...")
             self.init_event.set()
             
-            logging.info("Starting Controller")
+            logging.info("Controller initialised.")
             run_event_loop(self.__controller_add, self.__controller_remove, self.__controller_process, alive=self.__controller_alive)
             
         except Exception as exception:
@@ -221,7 +221,7 @@ class ImageProcessingThread(Thread):
             camera.start_pipeline()
             self.init_event.set()
             
-            logging.info("Starting Image Processing")
+            logging.info("Image Processing initialised.")
             while not self.stop_event.is_set():
                 if self.pause_event.is_set():
                     time.sleep(0.5)
@@ -311,7 +311,7 @@ class DataCollectionThread(Thread):
             
             self.init_event.set()
             
-            logging.info("Starting Data Collection")
+            logging.info("Data Collection initialised.")
             while not self.stop_event.is_set():
                 if self.pause_event.is_set():
                     time.sleep(0.5)
