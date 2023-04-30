@@ -38,8 +38,14 @@ class McQueen:
         logging.info("Starting main loop")
         try:
             while True:
+                # Do calculations
                 self.process_calculations()
                 self.process_flags()
+                
+                # Start all thread calulations when everything is initialised
+                if self.flag_initialised:
+                    self.pause_event.clear()
+                    
                 time.sleep(0.1)
                 
         except KeyboardInterrupt:
@@ -62,6 +68,7 @@ class McQueen:
     def threads_init(self):
         self.stop_event = Event()
         self.pause_event = Event()
+        self.pause_event.set()
         
         self.init_events = []
         self.init_event_imu = Event()
