@@ -274,7 +274,7 @@ class ImageProcessingThread(Thread):
                     # Calculate center offset                                                                 
                     lane_obj.calculate_car_position(print_to_terminal=False)
                     
-                print(lane_obj)
+                    print(lane_obj)
                 
                 time.sleep(5)
                 
