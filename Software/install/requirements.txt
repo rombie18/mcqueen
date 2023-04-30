@@ -5,3 +5,4 @@ adafruit-circuitpython-motor
 pyjoystick
 jetson-stats
 inquirer
+matplotlib

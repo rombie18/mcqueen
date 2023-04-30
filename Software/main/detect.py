@@ -35,7 +35,7 @@ def main():
      
   # Find lane line pixels using the sliding window method 
   left_fit, right_fit = lane_obj.get_lane_line_indices_sliding_windows(
-    plot=True)
+    plot=False)
  
   # Fill in the lane line
   lane_obj.get_lane_line_previous_window(left_fit, right_fit, plot=False)
@@ -51,7 +51,7 @@ def main():
      
   # Display curvature and center offset on image
   frame_with_lane_lines2 = lane_obj.display_curvature_offset(
-    frame=frame_with_lane_lines, plot=True)
+    frame=frame_with_lane_lines, plot=False)
      
   # Create the output file name by removing the '.jpg' part
   size = len(filename)

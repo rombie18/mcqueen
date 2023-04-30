@@ -19,6 +19,7 @@ pip3 install adafruit-blinka
 
 # Install additional requirements
 pip3 install -r requirements.txt
+apt install -y python3-matplotlib
 
 # Configure system service
 chmod +x mcqueen-service.sh
