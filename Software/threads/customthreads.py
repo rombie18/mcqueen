@@ -144,7 +144,7 @@ class StatsThread(Thread):
             logging.info("Stopped Stats")
                 
 class ControllerThread(Thread):
-    def __init__(self, pipe, stop_event, init_event, process_event):
+    def __init__(self, pipe, stop_event, init_event):
         super(ControllerThread, self).__init__(name="ControllerThread")
         
         self.pipe: deque = pipe
