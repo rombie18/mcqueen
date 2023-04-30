@@ -98,7 +98,7 @@ class EncoderThread(Thread):
                 
                 self.pipe.append({
                     'time': datetime.now(),
-                    'time_ns': time.time_ns(),
+                    'time_epoch': time.time(),
                     'position': sensor_encoder.getValue()
                 })
                 time.sleep(0.1)
