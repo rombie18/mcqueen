@@ -84,9 +84,6 @@ class McQueen:
         self.init_events.append(self.init_event_controller)
         self.init_events.append(self.init_event_imageprocessing)
         self.init_events.append(self.init_event_datacollection)
-        
-        for init_event in self.init_events:
-            print(init_event)
 
         self.pipe_imu = deque(maxlen=1000)
         self.pipe_encoder = deque(maxlen=1000)
@@ -143,15 +140,11 @@ class McQueen:
         self.__flag_initialised()
 
     def __flag_initialised(self):
-        print("--")
         for init_event in self.init_events:
-            print(init_event)
             if not init_event.is_set():
                 self.flag_initialised = False
-                print("f")
                 return
         self.flag_initialised = True
-        print("t")
 
             
 mcqueen = McQueen()

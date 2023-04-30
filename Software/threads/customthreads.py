@@ -305,6 +305,7 @@ class DataCollectionThread(Thread):
             self.path = path_base + path_data
             if not os.path.exists(path_base):
                 logging.warning("USB drive not detected, data collection disabled!")
+                self.init_event.set()
                 return
             if not os.path.exists(self.path):
                 os.makedirs(self.path)
