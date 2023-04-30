@@ -123,10 +123,11 @@ class StatsThread(Thread):
             logging.getLogger()
             
             logging.info("Initialising Stats...")
-            self.init_event.set()
-            
-            logging.info("Stats initialised.")
+
             with jtop() as jetson:
+                self.init_event.set()
+                logging.info("Stats initialised.")
+            
                 while not self.stop_event.is_set() and jetson.ok():
                     if self.pause_event.is_set():
                         time.sleep(0.5)
@@ -154,10 +155,12 @@ class ControllerThread(Thread):
             logging.getLogger()
             
             logging.info("Initialising Controller...")
-            self.init_event.set()
             
-            logging.info("Controller initialised.")
             run_event_loop(self.__controller_add, self.__controller_remove, self.__controller_process, alive=self.__controller_alive)
+            
+            self.init_event.set()
+            logging.info("Controller initialised.")
+
             
         except Exception as exception:
             logging.error(exception)
@@ -274,9 +277,6 @@ class ImageProcessingThread(Thread):
                 print(lane_obj)
                 
                 time.sleep(5)
-                    
-                
-                
                 
         except Exception as exception:
             logging.error(exception)
