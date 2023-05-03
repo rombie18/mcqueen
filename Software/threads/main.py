@@ -143,7 +143,6 @@ class McQueen:
     ### Flags ###
     def process_flags(self):
         self.__flag_initialised()
-        self.__flag_halt()
 
     def __flag_initialised(self):
         for init_event in self.init_events:
@@ -151,10 +150,6 @@ class McQueen:
                 self.flag_initialised = False
                 return
         self.flag_initialised = True
-        
-    def __flag_halt(self):
-        if self.flag_halt:
-            os.system("shutdown now -h")
         
     ### Helper functions ###
     def transform_heading_to_angle(self, heading):
