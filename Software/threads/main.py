@@ -75,10 +75,6 @@ class McQueen:
         logging.info("Starting all threads")
         self.threads_start()
         
-        logging.info("Starting controller")
-        mngr = pyjoystick.ThreadEventManager(event_loop=run_event_loop, add_joystick=self.controller_add, remove_joystick=self.controller_remove, handle_key_event=self.controller_process)
-        mngr.start()
-        
         logging.info("Starting main loop")
         try:
             while not self.stop_event.is_set():
