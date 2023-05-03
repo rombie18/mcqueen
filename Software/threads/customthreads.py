@@ -159,7 +159,7 @@ class ControllerThread(Thread):
             
             logging.info("Initialising Controller...")
             
-            mngr = pyjoystick.ThreadEventManager(self.__controller_add, self.__controller_remove, self.__controller_process)
+            mngr = pyjoystick.ThreadEventManager(event_loop=run_event_loop, add_joystick=self.__controller_add, remove_joystick=self.__controller_remove, handle_key_event=self.__controller_process, alive=self.__controller_alive)
             mngr.start()
             
             self.init_event.set()
@@ -195,6 +195,9 @@ class ControllerThread(Thread):
         }
         logging.debug("Controller event: " + str(key))
         self.pipe.append(data)
+        
+    def __controller_alive(self):
+        return self.stop_event.is_set()
         
 class ImageProcessingThread(Thread):
     def __init__(self, pipe, stop_event, init_event, pause_event):
