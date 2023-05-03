@@ -182,7 +182,6 @@ class McQueen:
 
     def controller_process(self, key):
         try:
-            logging.debug("Controller key event: " + str(vars(key)))
             if key.keytype == "Axis" and key.number == 0:
                 # Left joystick, left - right
                 # Steering
