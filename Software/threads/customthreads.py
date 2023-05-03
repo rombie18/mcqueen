@@ -287,13 +287,13 @@ class ImageProcessingThread(Thread):
                     curvem = (lane_obj.left_curvem + lane_obj.right_curvem) / 2
                     angle = math.degrees(math.atan(wheel_base / curvem)) * 6 + 90
 
-                    logging.debug("Curve radius left: " + str(angle))
-                    logging.debug("Curve radius right: " + str(angle))
-                    logging.debug("Steering angle: " + str(angle))
+                    #logging.debug("Curve radius left: " + str(angle))
+                    #logging.debug("Curve radius right: " + str(angle))
+                    #logging.debug("Steering angle: " + str(angle))
 
                     # Append result to pipe
                     self.pipe.append({
-                        'time': time.time(),
+                        'time': datetime.now(),
                         'center_offset': lane_obj.center_offset,
                         'left_curvem': lane_obj.left_curvem,
                         'right_curvem': lane_obj.right_curvem,
