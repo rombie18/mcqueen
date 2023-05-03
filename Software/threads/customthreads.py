@@ -174,6 +174,7 @@ class ControllerThread(Thread):
             'time': datetime.now(),
             'type': "add"
         }
+        logging.debug("Controller added: " + str(joy))
         self.pipe.append(data)
         
     def __controller_remove(self, joy):
@@ -181,6 +182,7 @@ class ControllerThread(Thread):
             'time': datetime.now(),
             'type': "remove",
         }
+        logging.debug("Controller removed: " + str(joy))
         self.pipe.append(data)
         
     def __controller_process(self, key):
@@ -189,6 +191,7 @@ class ControllerThread(Thread):
             'type': "event",
             'key': key
         }
+        logging.debug("Controller event: " + str(key))
         self.pipe.append(data)
         
     def __controller_alive(self):
@@ -248,11 +251,17 @@ class ImageProcessingThread(Thread):
                     #    continue
                     
                     # Plot the region of interest on the image
-                    lane_obj.plot_roi(plot=False)
+                    lane_obj.plot_roi(plot=True)
                     
                     # Perform the perspective transform to generate a bird's eye view
                     # If Plot == True, show image with new region of interest
-                    warped_frame = lane_obj.perspective_transform(plot=False)
+                    warped_frame = lane_obj.perspective_transform(plot=True)
+                    
+                    # If detected to little pixels, skip futher calculations
+                    detected_pixels = numpy.sum(warped_frame == 255)
+                    if detected_pixels < 3000:
+                        logging.debug("Only {} valid pixels, skipping this frame".format(detected_pixels))
+                        continue
                     
                     # Generate the image histogram to serve as a starting point
                     # for finding lane line pixels
@@ -269,17 +278,19 @@ class ImageProcessingThread(Thread):
                     frame_with_lane_lines = lane_obj.overlay_lane_lines(plot=False)
                     
                     # Calculate lane line curvature (left and right lane lines)
-                    lane_obj.calculate_curvature(print_to_terminal=True)
+                    lane_obj.calculate_curvature(print_to_terminal=False)
                     
                     # Calculate center offset                                                                 
-                    lane_obj.calculate_car_position(print_to_terminal=True)
+                    lane_obj.calculate_car_position(print_to_terminal=False)
 
                     # Calculate turning angle
                     wheel_base = 0.3
                     curvem = (lane_obj.left_curvem + lane_obj.right_curvem) / 2
-                    angle = math.degrees(math.atan(wheel_base / curvem))
+                    angle = math.degrees(math.atan(wheel_base / curvem)) * 6 + 90
 
-                    print(angle)
+                    logging.debug("Curve radius left: " + str(angle))
+                    logging.debug("Curve radius right: " + str(angle))
+                    logging.debug("Steering angle: " + str(angle))
 
                     # Append result to pipe
                     self.pipe.append({
