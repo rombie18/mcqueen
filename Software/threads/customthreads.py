@@ -13,6 +13,7 @@ import copy
 import cv2
 import json
 import numpy
+import math
 
 from  datetime import datetime
 from threading import Thread, Event
@@ -173,23 +174,21 @@ class ControllerThread(Thread):
             'time': datetime.now(),
             'type': "add"
         }
-        data.update(vars(joy))
         self.pipe.append(data)
         
     def __controller_remove(self, joy):
         data = {
             'time': datetime.now(),
-            'type': "remove"
+            'type': "remove",
         }
-        data.update(vars(joy))
         self.pipe.append(data)
         
     def __controller_process(self, key):
         data = {
             'time': datetime.now(),
-            'type': "event"
+            'type': "event",
+            'key': key
         }
-        data.update(vars(key))
         self.pipe.append(data)
         
     def __controller_alive(self):
@@ -274,6 +273,23 @@ class ImageProcessingThread(Thread):
                     
                     # Calculate center offset                                                                 
                     lane_obj.calculate_car_position(print_to_terminal=True)
+
+                    # Calculate turning angle
+                    wheel_base = 0.3
+                    curvem = (lane_obj.left_curvem + lane_obj.right_curvem) / 2
+                    angle = math.degrees(math.atan(wheel_base / curvem))
+
+                    print(angle)
+
+                    # Append result to pipe
+                    self.pipe.append({
+                        'time': time.time(),
+                        'center_offset': lane_obj.center_offset,
+                        'left_curvem': lane_obj.left_curvem,
+                        'right_curvem': lane_obj.right_curvem,
+                        'curvem': curvem,
+                        'angle': angle
+                    })
                                 
         except Exception as exception:
             logging.error(exception)

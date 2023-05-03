@@ -7,6 +7,7 @@ import json
 from lane import Lane
 from tis import TIS, SinkFormats
 import time
+import math
 
 camera = TIS()
 camera.open_device("02320237", 1280, 720, "60/1", SinkFormats.BGRA, False)
@@ -68,6 +69,13 @@ while True:
         
         # Calculate center offset                                                                 
         lane_obj.calculate_car_position(print_to_terminal=True)
+
+        # Calculate turning angle
+        wheel_base = 0.3
+        curvem = (lane_obj.left_curvem + lane_obj.right_curvem) / 2
+        angle = math.degrees(math.atan(wheel_base / curvem))
+
+        print(angle)
 
         cv2.imshow('frame', frame_with_lane_lines)
         if cv2.waitKey(1) == ord('q'):

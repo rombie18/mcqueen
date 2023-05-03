@@ -441,17 +441,16 @@ class Lane:
     # color space to HLS (hue, saturation, lightness).
     hls = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)
     
-    # h_channel = hls[:, :, 0] # use only the hue channel data
-    # _, h_binary = edge.threshold(h_channel, (177, 182))
-    # cv2.imshow("ellemoe", h_channel)
+    h_channel = hls[:, :, 0] # use only the hue channel data
+    _, h_binary = edge.threshold(h_channel, (175, 182))
     
-    # kernel = np.ones((9,9),np.uint8)
-    # closing = cv2.morphologyEx(h_binary, cv2.MORPH_CLOSE, kernel)
+    kernel = np.ones((9,9),np.uint8)
+    closing = cv2.morphologyEx(h_binary, cv2.MORPH_CLOSE, kernel)
         
-    # self.lane_line_markings = closing
-    # return self.lane_line_markings
+    self.lane_line_markings = closing
+    return self.lane_line_markings
 
-    
+    """
     ################### Isolate possible lane line edges ######################
          
     # Perform Sobel edge detection on the L (lightness) channel of 
@@ -487,7 +486,6 @@ class Lane:
     _, r_thresh = edge.threshold(frame[:, :, 2], thresh=(120, 255))
     _, g_thresh = edge.threshold(frame[:, :, 1], thresh=(170, 255))
     _, b_thresh = edge.threshold(frame[:, :, 0], thresh=(150, 255))
-    cv2.imshow("ellemoe", frame[:, :, 2])
 
     # Lane lines should be pure in color and have high red channel values 
     # Bitwise AND operation to reduce noise and black-out any pixels that
@@ -502,7 +500,9 @@ class Lane:
     # from this return value. The edges of lane lines are thin lines of pixels.
     self.lane_line_markings = cv2.bitwise_or(rs_binary, sxbinary.astype(
                               np.uint8))
+    
     return self.lane_line_markings
+    """
                                        
   def histogram_peak(self):
     """
