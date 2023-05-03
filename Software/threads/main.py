@@ -114,66 +114,67 @@ class McQueen:
         GPIO.cleanup()
 
     def handle_controls(self):
-        key = self.pipe_controller[-1]["key"]
-        if key.keytype == "Axis" and key.number == 0:
-            # Left joystick, left - right
-            # Steering
-            self.actuator_servo.angle = -key.raw_value * 90 + 90
+        if len(self.pipe_controller) > 0:
+            key = self.pipe_controller[-1]["key"]
+            if key.keytype == "Axis" and key.number == 0:
+                # Left joystick, left - right
+                # Steering
+                self.actuator_servo.angle = -key.raw_value * 90 + 90
 
-        if key.keytype == "Axis" and key.number == 4:
-            # Right trigger button
-            # Throttle
-            self.actuator_motor.throttle = key.raw_value * self.motor_pid.output_limits[1]
+            if key.keytype == "Axis" and key.number == 4:
+                # Right trigger button
+                # Throttle
+                self.actuator_motor.throttle = key.raw_value * self.motor_pid.output_limits[1]
 
-        if key.keytype == "Axis" and key.number == 3:
-            # Right trigger button
-            # Throttle
-            self.actuator_motor.throttle = -key.raw_value
+            if key.keytype == "Axis" and key.number == 3:
+                # Right trigger button
+                # Throttle
+                self.actuator_motor.throttle = -key.raw_value
 
-        if key.keytype == "Button" and key.number == 0 and key.raw_value == 1:
-            # Pink square button
-            # Change mode
-            if self.control == "AUTO":
-                self.control == "MANUAL"
-                self.actuator_motor.throttle = 0
-                self.actuator_servo.angle = 90
-            else:
-                self.control == "AUTO"
-            logging.debug("PID control mode:", self.pid_control)
+            if key.keytype == "Button" and key.number == 0 and key.raw_value == 1:
+                # Pink square button
+                # Change mode
+                if self.control == "AUTO":
+                    self.control == "MANUAL"
+                    self.actuator_motor.throttle = 0
+                    self.actuator_servo.angle = 90
+                else:
+                    self.control == "AUTO"
+                logging.debug("PID control mode:", self.pid_control)
 
-        if key.keytype == "Button" and key.number == 2 and key.raw_value == 1:
-            # Red circle button
-            # Safe stop
-            self.flag_stop = True
+            if key.keytype == "Button" and key.number == 2 and key.raw_value == 1:
+                # Red circle button
+                # Safe stop
+                self.flag_stop = True
 
-        if key.keytype == "Button" and key.number == 3 and key.raw_value == 1:
-            # Green triangle button
-            # Start
-            self.flag_pause = not self.flag_pause
+            if key.keytype == "Button" and key.number == 3 and key.raw_value == 1:
+                # Green triangle button
+                # Start
+                self.flag_pause = not self.flag_pause
 
-        if key.keytype == "Hat" and key.number == 0 and key.raw_value == 1:
-            # Left hat up
-            # Increase speed limit
-            self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] + 0.05)
+            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 1:
+                # Left hat up
+                # Increase speed limit
+                self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] + 0.05)
 
-        if key.keytype == "Hat" and key.number == 0 and key.raw_value == 4:
-            # Left hat down
-            # Decrease speed limit
-            self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] - 0.05)
+            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 4:
+                # Left hat down
+                # Decrease speed limit
+                self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] - 0.05)
 
-        if key.keytype == "Hat" and key.number == 0 and key.raw_value == 8:
-            # Left hat left
-            # Decrease PID heading
-            self.set_heading = self.set_heading - 5
-            self.servo_pid.setpoint = self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading))
-            logging.debug("PID heading set to ", self.set_heading)
+            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 8:
+                # Left hat left
+                # Decrease PID heading
+                self.set_heading = self.set_heading - 5
+                self.servo_pid.setpoint = self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading))
+                logging.debug("PID heading set to ", self.set_heading)
 
-        if key.keytype == "Hat" and key.number == 0 and key.raw_value == 2:
-            # Left hat right
-            # Increase PID heading
-            self.set_heading = self.set_heading + 5
-            self.servo_pid.setpoint = self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading))
-            logging.debug("PID heading set to ", self.set_heading)
+            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 2:
+                # Left hat right
+                # Increase PID heading
+                self.set_heading = self.set_heading + 5
+                self.servo_pid.setpoint = self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading))
+                logging.debug("PID heading set to ", self.set_heading)
 
     ### Control loops ###
     def process_control_loops(self):
