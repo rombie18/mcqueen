@@ -182,6 +182,7 @@ class McQueen:
     def controller_remove(self, joy):
         logging.debug('Controller disconnected: ', joy)
         # Robot sould stop here or at least continue in a very slow safe mode
+        logging.warning('Controller disconnected, no controls available. Stopping for safety!')
         self.stop_event.set()
 
     def controller_process(self, key):
