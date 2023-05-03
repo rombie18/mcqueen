@@ -80,7 +80,7 @@ def main():
         camera.set_property("conversion-element", "tcamdutils-cuda")
         camera.set_property("serial", serial)
 
-    file_location = "/tmp/tiscamera-save-stream.avi"
+    file_location = "/home/mcqueen/tiscamera-save-stream.avi"
 
     fsink = pipeline.get_by_name("fsink")
     fsink.set_property("location", file_location)
