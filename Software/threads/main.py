@@ -172,17 +172,17 @@ class McQueen:
 
     ### Controller functions ###
     def controller_add(self, joy):
-        logging.debug('Controller connected: ', str(vars(joy)))
+        logging.debug('Controller connected')
 
     def controller_remove(self, joy):
-        logging.debug('Controller disconnected: ', str(vars(joy)))
+        logging.debug('Controller disconnected')
         # Robot sould stop here or at least continue in a very slow safe mode
         logging.warning('Controller disconnected, no controls available. Stopping for safety!')
         self.stop_event.set()
 
     def controller_process(self, key):
         try:
-            logging.debug("Controller key event: " + str(vars(joy)))
+            logging.debug("Controller key event: " + str(vars(key)))
             if key.keytype == "Axis" and key.number == 0:
                 # Left joystick, left - right
                 # Steering
