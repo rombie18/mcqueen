@@ -20,6 +20,7 @@ from threading import Thread, Event
 from collections import deque
 from busio import I2C
 from adafruit_bno055 import BNO055_I2C
+import pyjoystick
 from pyjoystick.sdl2 import run_event_loop
 from jtop import jtop
 
@@ -158,7 +159,8 @@ class ControllerThread(Thread):
             
             logging.info("Initialising Controller...")
             
-            run_event_loop(self.__controller_add, self.__controller_remove, self.__controller_process, alive=self.__controller_alive)
+            mngr = pyjoystick.ThreadEventManager(self.__controller_add, self.__controller_remove, self.__controller_process, alive=self.__controller_alive)
+            mngr.start()
             
             self.init_event.set()
             logging.info("Controller initialised.")
@@ -251,11 +253,11 @@ class ImageProcessingThread(Thread):
                     #    continue
                     
                     # Plot the region of interest on the image
-                    lane_obj.plot_roi(plot=True)
+                    lane_obj.plot_roi(plot=False)
                     
                     # Perform the perspective transform to generate a bird's eye view
                     # If Plot == True, show image with new region of interest
-                    warped_frame = lane_obj.perspective_transform(plot=True)
+                    warped_frame = lane_obj.perspective_transform(plot=False)
                     
                     # If detected to little pixels, skip futher calculations
                     detected_pixels = numpy.sum(warped_frame == 255)
