@@ -144,58 +144,6 @@ class StatsThread(Thread):
             self.stop_event.set()
         finally:
             logging.info("Stopped Stats")
-                
-class ControllerThread(Thread):
-    def __init__(self, pipe, stop_event, init_event):
-        super(ControllerThread, self).__init__(name="ControllerThread")
-        
-        self.pipe: deque = pipe
-        self.stop_event: Event = stop_event
-        self.init_event: Event = init_event
-
-    def run(self):
-        try:
-            logging.getLogger()
-            
-            logging.info("Initialising Controller...")
-            mngr = pyjoystick.ThreadEventManager(event_loop=run_event_loop, add_joystick=self.__controller_add, remove_joystick=self.__controller_remove, handle_key_event=self.__controller_process)
-            mngr.start()
-
-            self.init_event.set()
-            logging.info("Controller initialised.")
-            
-            while not self.stop_event.is_set():
-                time.sleep(1)
-            
-        except Exception as exception:
-            logging.error(exception)
-            traceback.print_exc()
-            self.stop_event.set()
-            
-    def __controller_add(self, joy):
-        data = {
-            'time': datetime.now(),
-            'type': "add"
-        }
-        logging.debug("Controller added: " + str(joy))
-        self.pipe.append(data)
-        
-    def __controller_remove(self, joy):
-        data = {
-            'time': datetime.now(),
-            'type': "remove",
-        }
-        logging.debug("Controller removed: " + str(joy))
-        self.pipe.append(data)
-        
-    def __controller_process(self, key):
-        data = {
-            'time': datetime.now(),
-            'type': "event",
-            'key': key
-        }
-        logging.debug("Controller event: " + str(key))
-        self.pipe.append(data)
         
 class ImageProcessingThread(Thread):
     def __init__(self, pipe, stop_event, init_event, pause_event):

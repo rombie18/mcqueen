@@ -15,7 +15,7 @@ from busio import I2C
 from simple_pid import PID
 from pyjoystick.sdl2 import run_event_loop
 
-from customthreads import IMUThread, EncoderThread, StatsThread, ControllerThread, ImageProcessingThread, DataCollectionThread
+from customthreads import IMUThread, EncoderThread, StatsThread, ImageProcessingThread, DataCollectionThread
 
 class McQueen:
     def __init__(self):
@@ -71,6 +71,9 @@ class McQueen:
         self.motor_pid.output_limits = (0, 0.2)
         self.motor_pid.sample_time = 0.1
 
+        logging.info("Starting controller")
+        mngr = pyjoystick.ThreadEventManager(event_loop=run_event_loop, add_joystick=self.controller_add, remove_joystick=self.controller_remove, handle_key_event=self.controller_process)
+        mngr.start()
 
         logging.info("Starting all threads")
         self.threads_start()
@@ -112,69 +115,6 @@ class McQueen:
         self.actuator_motor.throttle = 0
         self.actuator_servo.angle = self.transform_heading_to_angle(0)
         GPIO.cleanup()
-
-    def handle_controls(self):
-        if len(self.pipe_controller) > 0:
-            key = self.pipe_controller[-1]["key"]
-            if key.keytype == "Axis" and key.number == 0:
-                # Left joystick, left - right
-                # Steering
-                self.actuator_servo.angle = -key.raw_value * 90 + 90
-
-            if key.keytype == "Axis" and key.number == 4:
-                # Right trigger button
-                # Throttle
-                self.actuator_motor.throttle = key.raw_value * self.motor_pid.output_limits[1]
-
-            if key.keytype == "Axis" and key.number == 3:
-                # Right trigger button
-                # Throttle
-                self.actuator_motor.throttle = -key.raw_value
-
-            if key.keytype == "Button" and key.number == 0 and key.raw_value == 1:
-                # Pink square button
-                # Change mode
-                if self.control == "AUTO":
-                    self.control == "MANUAL"
-                    self.actuator_motor.throttle = 0
-                    self.actuator_servo.angle = 90
-                else:
-                    self.control == "AUTO"
-                logging.debug("PID control mode:", self.pid_control)
-
-            if key.keytype == "Button" and key.number == 2 and key.raw_value == 1:
-                # Red circle button
-                # Safe stop
-                self.flag_stop = True
-
-            if key.keytype == "Button" and key.number == 3 and key.raw_value == 1:
-                # Green triangle button
-                # Start
-                self.flag_pause = not self.flag_pause
-
-            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 1:
-                # Left hat up
-                # Increase speed limit
-                self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] + 0.05)
-
-            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 4:
-                # Left hat down
-                # Decrease speed limit
-                self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] - 0.05)
-
-            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 8:
-                # Left hat left
-                # Decrease PID heading
-                self.set_heading = self.set_heading - 5
-                self.servo_pid.setpoint = self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading))
-                logging.debug("PID heading set to ", self.set_heading)
-
-            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 2:
-                # Left hat right
-                # Increase PID heading
-                self.set_heading = self.set_heading + 5
-                self.servo_pid.setpoint = self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading))
-                logging.debug("PID heading set to ", self.set_heading)
 
     ### Control loops ###
     def process_control_loops(self):
@@ -242,13 +182,81 @@ class McQueen:
 
     ### Controller functions ###
     def controller_add(self, joy):
-        logging.debug('Controller connected:', joy)
+        print('Controller connected:', joy)
 
     def controller_remove(self, joy):
-        logging.debug('Controller disconnected:', joy)
+        print('Controller disconnected:', joy)
         # Robot sould stop here or at least continue in a very slow safe mode
-        logging.warning("Bluetooth controller disconnected, stopping for safety")
-        self.flag_stop = True
+        self.stop = True
+
+    def controller_process(self, key):
+        try:
+            print(key)
+            if key.keytype == "Axis" and key.number == 0:
+                # Left joystick, left - right
+                # Steering
+                self.actuator_servo.angle = -key.raw_value * 90 + 90
+
+            if key.keytype == "Axis" and key.number == 4:
+                # Right trigger button
+                # Throttle
+                self.actuator_motor.throttle = key.raw_value * self.motor_pid.output_limits[1]
+
+            if key.keytype == "Axis" and key.number == 3:
+                # Right trigger button
+                # Throttle
+                self.actuator_motor.throttle = -key.raw_value
+
+            if key.keytype == "Button" and key.number == 0 and key.raw_value == 1:
+                # Pink square button
+                # Change mode
+                if self.pid_control:
+                    self.pid_control = False
+                    self.actuator_motor.throttle = 0
+                    self.actuator_servo.angle = 90
+                else:
+                    self.pid_control = True
+                print("PID control mode:", self.pid_control)
+
+            if key.keytype == "Button" and key.number == 2 and key.raw_value == 1:
+                # Red circle button
+                # Safe stop
+                self.stop = True
+
+            if key.keytype == "Button" and key.number == 3 and key.raw_value == 1:
+                # Green triangle button
+                # Start
+                self.start = not self.start
+
+            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 1:
+                # Left hat up
+                # Increase speed limit
+                self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] + 0.05)
+
+            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 4:
+                # Left hat down
+                # Decrease speed limit
+                self.motor_pid.output_limits = (0, self.motor_pid.output_limits[1] - 0.05)
+
+            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 8:
+                print(vars(key))
+                # Left hat left
+                # Decrease PID heading
+                self.set_heading = self.set_heading - 5
+                self.servo_pid.setpoint = self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading))
+                print("PID heading set to ", self.set_heading)
+
+            if key.keytype == "Hat" and key.number == 0 and key.raw_value == 2:
+                # Left hat right
+                # Increase PID heading
+                self.set_heading = self.set_heading + 5
+                self.servo_pid.setpoint = self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.set_heading))
+                print("PID heading set to ", self.set_heading)
+
+        except Exception as e:
+            print("-----------CONTORLLER ERROR-----------")
+            print(e)
+            print("-----------------CEND-----------------")
 
     ### Threading ###
     def threads_init(self):
@@ -260,13 +268,11 @@ class McQueen:
         self.init_event_imu = Event()
         self.init_event_encoder = Event()
         self.init_event_stats = Event()
-        self.init_event_controller = Event()
         self.init_event_imageprocessing = Event()
         self.init_event_datacollection = Event()
         self.init_events.append(self.init_event_imu)
         self.init_events.append(self.init_event_encoder)
         self.init_events.append(self.init_event_stats)
-        self.init_events.append(self.init_event_controller)
         self.init_events.append(self.init_event_imageprocessing)
         self.init_events.append(self.init_event_datacollection)
 
@@ -288,7 +294,6 @@ class McQueen:
         self.threads.append(IMUThread(self.pipe_imu, self.stop_event, self.init_event_imu, self.pause_event))
         self.threads.append(EncoderThread(self.pipe_encoder, self.stop_event, self.init_event_encoder, self.pause_event))
         self.threads.append(StatsThread(self.pipe_stats, self.stop_event, self.init_event_stats, self.pause_event))
-        self.threads.append(ControllerThread(self.pipe_controller, self.stop_event, self.init_event_controller))
         self.threads.append(ImageProcessingThread(self.pipe_imageprocessing, self.stop_event, self.init_event_imageprocessing, self.pause_event))
         self.threads.append(DataCollectionThread(None, self.stop_event, self.init_event_datacollection, self.pause_event, self.pipes))
         
