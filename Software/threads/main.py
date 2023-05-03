@@ -28,9 +28,6 @@ class McQueen:
         self.control = "MANUAL"
         
         self.flag_initialised = False
-        self.flag_halt = False
-        self.flag_stop = False
-        self.flag_pause = False
         
         self.velocity = 0
         self.set_velocity = 0
@@ -81,7 +78,6 @@ class McQueen:
         logging.info("Starting main loop")
         try:
             while not self.stop_event.is_set():
-                self.handle_controls()
                 self.process_flags()
                 
                 #TODO improve state machine
@@ -111,7 +107,6 @@ class McQueen:
     def safe_stop(self):
         logging.info("Safe stop")
         self.threads_stop()
-        self.flag_stop = True
         self.actuator_motor.throttle = 0
         self.actuator_servo.angle = self.transform_heading_to_angle(0)
         GPIO.cleanup()
@@ -182,16 +177,16 @@ class McQueen:
 
     ### Controller functions ###
     def controller_add(self, joy):
-        print('Controller connected:', joy)
+        logging.debug('Controller connected: ', joy)
 
     def controller_remove(self, joy):
-        print('Controller disconnected:', joy)
+        logging.debug('Controller disconnected: ', joy)
         # Robot sould stop here or at least continue in a very slow safe mode
-        self.stop = True
+        self.stop_event.set()
 
     def controller_process(self, key):
         try:
-            print(key)
+            logging.debug("Controller key event: " + key)
             if key.keytype == "Axis" and key.number == 0:
                 # Left joystick, left - right
                 # Steering
