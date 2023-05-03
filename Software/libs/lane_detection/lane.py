@@ -441,16 +441,17 @@ class Lane:
     # color space to HLS (hue, saturation, lightness).
     hls = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)
     
-    h_channel = hls[:, :, 0] # use only the hue channel data
-    _, h_binary = edge.threshold(h_channel, (177, 182))
+    # h_channel = hls[:, :, 0] # use only the hue channel data
+    # _, h_binary = edge.threshold(h_channel, (177, 182))
+    # cv2.imshow("ellemoe", h_channel)
     
-    kernel = np.ones((9,9),np.uint8)
-    closing = cv2.morphologyEx(h_binary, cv2.MORPH_CLOSE, kernel)
+    # kernel = np.ones((9,9),np.uint8)
+    # closing = cv2.morphologyEx(h_binary, cv2.MORPH_CLOSE, kernel)
         
-    self.lane_line_markings = closing
-    return self.lane_line_markings
+    # self.lane_line_markings = closing
+    # return self.lane_line_markings
 
-    """
+    
     ################### Isolate possible lane line edges ######################
          
     # Perform Sobel edge detection on the L (lightness) channel of 
@@ -483,9 +484,10 @@ class Lane:
     # White in the regions with the richest red channel values (e.g. >120).
     # Remember, pure white is bgr(255, 255, 255).
     # Pure yellow is bgr(0, 255, 255). Both have high red channel values.
-    _, r_thresh = edge.threshold(frame[:, :, 2], thresh=(60, 255))
+    _, r_thresh = edge.threshold(frame[:, :, 2], thresh=(120, 255))
     _, g_thresh = edge.threshold(frame[:, :, 1], thresh=(170, 255))
     _, b_thresh = edge.threshold(frame[:, :, 0], thresh=(150, 255))
+    cv2.imshow("ellemoe", frame[:, :, 2])
 
     # Lane lines should be pure in color and have high red channel values 
     # Bitwise AND operation to reduce noise and black-out any pixels that
@@ -500,7 +502,7 @@ class Lane:
     # from this return value. The edges of lane lines are thin lines of pixels.
     self.lane_line_markings = cv2.bitwise_or(rs_binary, sxbinary.astype(
                               np.uint8))
-    """
+    return self.lane_line_markings
                                        
   def histogram_peak(self):
     """
@@ -541,7 +543,9 @@ class Lane:
     newwarp = cv2.warpPerspective(color_warp, self.inv_transformation_matrix, (
                                   self.orig_frame.shape[
                                   1], self.orig_frame.shape[0]))
-     
+
+    self.orig_frame = cv2.cvtColor(self.orig_frame, cv2.COLOR_BGRA2BGR)
+
     # Combine the result with the original image
     result = cv2.addWeighted(self.orig_frame, 1, newwarp, 0.3, 0)
          
@@ -567,7 +571,7 @@ class Lane:
     :return: Bird's eye view of the current lane
     """
     if frame is None:
-      frame = self.lane_line_markings
+      frame = self.lane_line_markings    
              
     # Calculate the transformation matrix
     self.transformation_matrix = cv2.getPerspectiveTransform(
@@ -586,7 +590,7 @@ class Lane:
     (thresh, binary_warped) = cv2.threshold(
       self.warped_frame, 127, 255, cv2.THRESH_BINARY)           
     self.warped_frame = binary_warped
- 
+
     # Display the perspective transformed (i.e. warped) frame
     if plot == True:
       warped_copy = self.warped_frame.copy()

@@ -121,7 +121,6 @@ class McQueen:
         mngr.start()
 
         while not self.stop:
-            time_start = time.time()
             self.calculate_velocity()
             self.calculate_heading()
             if self.pid_control:
@@ -131,8 +130,6 @@ class McQueen:
             if self.start:
                 self.actuator_servo.angle = self.do_image_proccess()
 
-            time_end = time.time()
-            print(time_end - time_start)
 
     def safe_stop(self):
         self.stop = True
@@ -186,6 +183,7 @@ class McQueen:
 
     def controller_process(self, key):
         try:
+            print(key)
             if key.keytype == "Axis" and key.number == 0:
                 # Left joystick, left - right
                 # Steering

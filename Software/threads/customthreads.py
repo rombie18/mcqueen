@@ -245,8 +245,8 @@ class ImageProcessingThread(Thread):
                     # Perform thresholding to isolate lane lines
                     lane_line_markings = lane_obj.get_line_markings()
                     # If there are less than 50 'lane' pixels detected, skip calculations
-                    if numpy.sum(lane_line_markings == 255) < 50:
-                        continue
+                    #if numpy.sum(lane_line_markings == 255) < 50:
+                    #    continue
                     
                     # Plot the region of interest on the image
                     lane_obj.plot_roi(plot=False)
@@ -270,15 +270,11 @@ class ImageProcessingThread(Thread):
                     frame_with_lane_lines = lane_obj.overlay_lane_lines(plot=False)
                     
                     # Calculate lane line curvature (left and right lane lines)
-                    lane_obj.calculate_curvature(print_to_terminal=False)
+                    lane_obj.calculate_curvature(print_to_terminal=True)
                     
                     # Calculate center offset                                                                 
-                    lane_obj.calculate_car_position(print_to_terminal=False)
-                    
-                    print(lane_obj)
-                
-                time.sleep(5)
-                
+                    lane_obj.calculate_car_position(print_to_terminal=True)
+                                
         except Exception as exception:
             logging.error(exception)
             traceback.print_exc()
