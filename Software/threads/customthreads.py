@@ -158,13 +158,14 @@ class ControllerThread(Thread):
             logging.getLogger()
             
             logging.info("Initialising Controller...")
-            
             mngr = pyjoystick.ThreadEventManager(event_loop=run_event_loop, add_joystick=self.__controller_add, remove_joystick=self.__controller_remove, handle_key_event=self.__controller_process)
             mngr.start()
-            
+
             self.init_event.set()
             logging.info("Controller initialised.")
-
+            
+            while not self.stop_event.is_set():
+                time.sleep(1)
             
         except Exception as exception:
             logging.error(exception)
@@ -292,14 +293,15 @@ class ImageProcessingThread(Thread):
                     #logging.debug("Steering angle: " + str(angle))
 
                     # Append result to pipe
-                    self.pipe.append({
+                    data = {
                         'time': datetime.now(),
                         'center_offset': lane_obj.center_offset,
                         'left_curvem': lane_obj.left_curvem,
                         'right_curvem': lane_obj.right_curvem,
                         'curvem': curvem,
                         'angle': angle
-                    })
+                    }
+                    self.pipe.append(data)
                                 
         except Exception as exception:
             logging.error(exception)
