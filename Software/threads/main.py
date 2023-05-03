@@ -120,8 +120,8 @@ class McQueen:
         self.actuator_motor.throttle = self.motor_pid(self.velocity)
 
     def __cycle_loop_steering(self):
-        self.actuator_servo.angle = self.transform_centerangle_to_angle(self.servo_pid(
-            self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.heading))))
+        self.actuator_servo.angle = self.pipe_imageprocessing["angle"]
+        #self.actuator_servo.angle = self.transform_centerangle_to_angle(self.servo_pid(self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.heading))))
 
     ### Calculations ###
     def process_calculations(self):
@@ -212,12 +212,15 @@ class McQueen:
             if key.keytype == "Button" and key.number == 2 and key.raw_value == 1:
                 # Red circle button
                 # Safe stop
-                self.stop = True
+                self.safe_stop()
 
             if key.keytype == "Button" and key.number == 3 and key.raw_value == 1:
                 # Green triangle button
                 # Start
-                self.start = not self.start
+                if self.pause_event.is_set(): 
+                    self.pause_event.clear()
+                else:
+                    self.pause_event.set()
 
             if key.keytype == "Hat" and key.number == 0 and key.raw_value == 1:
                 # Left hat up
