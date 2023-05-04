@@ -306,9 +306,9 @@ class DataCollectionThread(Thread):
 
     def __save(self):
         # Make local copy to prevent locked pipes
-        pipes = copy.deepcopy(self.pipes)
-        # Clear pipes
-        for pipe in self.pipes.values():
+        pipes = {}
+        for name, pipe in self.pipes.items():
+            pipes[name] = pipe.copy()
             pipe.clear()
         # Save local copy to file
         for name, pipe in pipes.items():

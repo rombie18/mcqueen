@@ -41,8 +41,8 @@ class Lane:
     # You need to find these corners manually.
     self.roi_points = np.float32([
       (460,0), # Top-left corner
-      (0, 330), # Bottom-left corner            
-      (1280,330), # Bottom-right corner
+      (0, 260), # Bottom-left corner            
+      (1280,260), # Bottom-right corner
       (820,0) # Top-right corner
     ])
          
@@ -62,8 +62,8 @@ class Lane:
     self.histogram = None
          
     # Sliding window parameters
-    self.no_of_windows = 10
-    self.margin = int((1/12) * width)  # Window width is +/- margin
+    self.no_of_windows = 20
+    self.margin = int((1/8) * width)  # Window width is +/- margin
     self.minpix = int((1/24) * width)  # Min no. of pixels to recenter window
          
     # Best fit polynomial lines for left line and right line of the lane
@@ -160,6 +160,8 @@ class Lane:
     if frame is None:
       frame = self.warped_frame
              
+    frame = frame[self.height-200:self.height, 0:self.width]
+    
     # Generate the histogram
     self.histogram = np.sum(frame[int(
               frame.shape[0]/2):,:], axis=0)
@@ -341,6 +343,8 @@ class Lane:
  
     # Go through one window at a time
     no_of_windows = self.no_of_windows
+    leftempty = 0
+    rightempty = 0
          
     for window in range(no_of_windows):
        
@@ -372,8 +376,16 @@ class Lane:
       minpix = self.minpix
       if len(good_left_inds) > minpix:
         leftx_current = np.int(np.mean(nonzerox[good_left_inds]))
+      else:
+        leftempty = leftempty + 1
+        if leftempty == 1:
+          leftx_current = 0
       if len(good_right_inds) > minpix:        
         rightx_current = np.int(np.mean(nonzerox[good_right_inds]))
+      else:
+        rightempty = rightempty + 1
+        if rightempty == 1:
+          rightx_current = self.width
                      
     # Concatenate the arrays of indices
     left_lane_inds = np.concatenate(left_lane_inds)
@@ -436,21 +448,12 @@ class Lane:
     """
     if frame is None:
       frame = self.orig_frame
-             
+           
     # Convert the video frame from BGR (blue, green, red) 
     # color space to HLS (hue, saturation, lightness).
     hls = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)
-    
-    h_channel = hls[:, :, 0] # use only the hue channel data
-    _, h_binary = edge.threshold(h_channel, (175, 182))
-    
-    kernel = np.ones((9,9),np.uint8)
-    closing = cv2.morphologyEx(h_binary, cv2.MORPH_CLOSE, kernel)
-        
-    self.lane_line_markings = closing
-    return self.lane_line_markings
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    """
     ################### Isolate possible lane line edges ######################
          
     # Perform Sobel edge detection on the L (lightness) channel of 
@@ -467,34 +470,10 @@ class Lane:
 
     ######################## Isolate possible lane lines ######################
    
-    # Perform binary thresholding on the S (saturation) channel 
-    # of the video frame. A high saturation value means the hue color is pure.
-    # We expect lane lines to be nice, pure colors (i.e. solid white, yellow)
-    # and have high saturation channel values.
-    # s_binary is matrix full of 0s (black) and 255 (white) intensity values
-    # White in the regions with the purest hue colors (e.g. >80...play with
-    # this value for best results).
-    s_channel = hls[:, :, 2] # use only the saturation channel data
-    _, s_binary = edge.threshold(s_channel, (60, 255))
+    lower = np.array([0, 100, 50])
+    upper = np.array([180, 250, 255])
+    rs_binary = cv2.inRange(hsv, lower, upper)
     
-    # Perform binary thresholding on the R (red) channel of the 
-        # original BGR video frame. 
-    # r_thresh is a matrix full of 0s (black) and 255 (white) intensity values
-    # White in the regions with the richest red channel values (e.g. >120).
-    # Remember, pure white is bgr(255, 255, 255).
-    # Pure yellow is bgr(0, 255, 255). Both have high red channel values.
-    _, r_thresh = edge.threshold(frame[:, :, 2], thresh=(120, 255))
-    _, g_thresh = edge.threshold(frame[:, :, 1], thresh=(170, 255))
-    _, b_thresh = edge.threshold(frame[:, :, 0], thresh=(150, 255))
-
-    # Lane lines should be pure in color and have high red channel values 
-    # Bitwise AND operation to reduce noise and black-out any pixels that
-    # don't appear to be nice, pure, solid colors (like white or yellow lane 
-    # lines.)
-    
-    # Keep parts of images that are in range r_thresh and out of range g_thresh and b_thresh
-    rs_binary = cv2.bitwise_and(s_binary, cv2.bitwise_and(r_thresh, cv2.bitwise_not(cv2.bitwise_and(g_thresh, b_thresh))))
- 
     ### Combine the possible lane lines with the possible lane line edges ##### 
     # If you show rs_binary visually, you'll see that it is not that different 
     # from this return value. The edges of lane lines are thin lines of pixels.
@@ -502,7 +481,7 @@ class Lane:
                               np.uint8))
     
     return self.lane_line_markings
-    """
+    
                                        
   def histogram_peak(self):
     """
@@ -571,7 +550,11 @@ class Lane:
     :return: Bird's eye view of the current lane
     """
     if frame is None:
-      frame = self.lane_line_markings    
+      frame = self.lane_line_markings  
+          
+    mask = np.zeros(frame.shape)
+    cv2.fillPoly(mask, pts=np.int32([self.roi_points]), color=(255,255,255))
+    frame = cv2.bitwise_and(frame, np.uint8(mask))
              
     # Calculate the transformation matrix
     self.transformation_matrix = cv2.getPerspectiveTransform(
