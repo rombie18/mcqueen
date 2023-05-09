@@ -26,6 +26,7 @@ from jtop import jtop
 
 from encoder import Encoder
 from lane import Lane
+import edge_detection as edge # Handles the detection of lane lines
 from tis import TIS, SinkFormats
 
 class IMUThread(Thread):
@@ -376,7 +377,111 @@ class LowImageProcessingThread(Thread):
             traceback.print_exc()
             self.stop_event.set()
         finally:
-            logging.info("Stopped Image Processing")
+            logging.info("Stopped Low Image Processing")
+            
+            
+class SideImageProcessingThread(Thread):
+    def __init__(self, pipe, stop_event, init_event, pause_event):
+        super(SideImageProcessingThread, self).__init__(name="SideImageProcessingThread")
+        
+        self.pipe: deque = pipe
+        self.stop_event: Event = stop_event
+        self.init_event: Event = init_event
+        self.pause_event: Event = pause_event
+
+    def run(self):
+        try:
+            logging.getLogger()
+            
+            logging.info("Initialising Side Image Processing...")
+            
+            X_lb=0
+            Y_lb=0
+            X_rb=0
+            Y_rb=0
+
+            h1= 0
+            h2= 0
+            fixed_value = 400
+            
+            #Specifying upper and lower ranges of color to detect in hsv format
+            lower = numpy.array([168, 40 ,0 ])
+            upper = numpy.array([180, 255 ,255 ])
+            lower_2 = numpy.array([0, 82 ,13 ])
+            upper_2 = numpy.array([20, 255 ,255])
+            
+            cap = cv2.VideoCapture(2)
+
+            self.init_event.set()
+            
+            logging.info("Image Processing initialised.")
+            while not self.stop_event.is_set() and cap.isOpened():
+                if self.pause_event.is_set():
+                    time.sleep(0.5)
+                    continue
+                
+                # Load a frame (or image)
+                _, video = cap.read()   
+
+                hight, width, _ = video.shape #Get resolution
+
+                video_cropped = video[0:hight, 0:width]
+
+                video_hsv = cv2.cvtColor(video_cropped, cv2.COLOR_BGR2HSV) #Converting BGR image to HSV format
+
+                mask_video_1 = cv2.inRange(video_hsv, lower, upper) # Masking the image to find our color
+                mask_video_2 = cv2.inRange(video_hsv, lower_2, upper_2)
+
+                mask_video = mask_video_1 | mask_video_2
+
+                mask_leftBand = mask_video[0:hight, int(220):int(250)] #Crop right band
+                mask_rightBand = mask_video[0:hight, int(width-250):int(width-220)] #crop left band
+
+                mask_contours_leftBand, hierarchy = cv2.findContours(mask_leftBand, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE) #Finding contours in mask image (leftband)
+                mask_contours_rightBand, hierarchy = cv2.findContours(mask_rightBand, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE) #Finding contours in mask image (rightband)
+
+                # Finding position of all contours of the bands
+                if len(mask_contours_leftBand or mask_contours_rightBand) != 0:
+                    for i_lb, k_rb in zip(mask_contours_leftBand, mask_contours_rightBand):
+                        if cv2.contourArea(i_lb) > 500:
+                            x1, y1, w1, h1 = cv2.boundingRect(i_lb)
+                            cv2.rectangle(video_cropped, (x1+200, y1), (x1 + w1+200, y1 + h1), (0, 0, 255), 3) #drawing rectangle
+                        
+                        if cv2.contourArea(k_rb) > 500:
+                            x2, y2, w2, h2 = cv2.boundingRect(k_rb)
+                            X_rb = int(width-(x2+(w2/2))) #calculate center of rectangle
+                            Y_rb = int(y2+(h2/2))
+                            cv2.rectangle(video_cropped, ((width-x2-250), y2), (((width-x2-250) + w2), (y2 + h2)), (255, 0, 0), 3) #drawing rectangle (formula needed, otherwise it will add it on the left side)
+
+                    angle1 = 1269.3 * math.exp(-0.008 * h1)
+                    angle2 = 1269.3 * math.exp(-0.008 * h2)
+
+                    angle = (angle1 + angle2) / 2
+                    #angle = 2*10^-9 * h1^4 - 6*10^-6 * h1^3 + 0.0071*h1^2 - 3.6433*h1 + 760.07
+                    
+                    if angle < 0:
+                        angle = 0
+                        
+                    if angle > 180:
+                        angle = 180
+                        
+                    logging.debug("H1: " + str(h1))
+                    logging.debug("Angle: " + str(angle))
+                
+                    # Append result to pipe
+                    data = {
+                        'time': datetime.now(),
+                        'angle': angle
+                    }
+                    self.pipe.append(data)
+                                
+        except Exception as exception:
+            logging.error(exception)
+            traceback.print_exc()
+            self.stop_event.set()
+        finally:
+            logging.info("Stopped Side Image Processing")
+            
 
 class DataCollectionThread(Thread):
     def __init__(self, pipe, stop_event, init_event, pause_event, pipes):
