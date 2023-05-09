@@ -15,7 +15,7 @@ from busio import I2C
 from simple_pid import PID
 from pyjoystick.sdl2 import run_event_loop
 
-from customthreads import IMUThread, EncoderThread, StatsThread, ImageProcessingThread, DataCollectionThread
+from customthreads import IMUThread, EncoderThread, StatsThread, LowImageProcessingThread, DataCollectionThread, ImageProcessingThread
 
 class McQueen:
     def __init__(self):
@@ -25,7 +25,7 @@ class McQueen:
         
         # Init variables
         self.state = "INITIALISING"
-        self.control = "MANUAL"
+        self.control = "AUTO"
         
         self.flag_initialised = False
         
@@ -36,6 +36,8 @@ class McQueen:
         
         self._current_encoder = None
         self._previous_encoder = None
+
+        self.anglefactor = 1
         
         # Init threads
         self.threads_init()
@@ -64,7 +66,7 @@ class McQueen:
         self.servo_pid.output_limits = (-90, 90)
         self.servo_pid.sample_time = 0.1
         # Max safe speed = 0.3,  Slow = 0.1,  AVG = 0.2
-        self.motor_pid = PID(1, 0, 0, setpoint=0.1)
+        self.motor_pid = PID(1, 0, 0, setpoint=0)
         self.motor_pid.output_limits = (0, 0.2)
         self.motor_pid.sample_time = 0.1
 
@@ -117,11 +119,15 @@ class McQueen:
         self.__cycle_loop_steering()
 
     def __cycle_loop_motor(self):
-        self.actuator_motor.throttle = self.motor_pid(self.velocity)
+        self.actuator_motor.throttle = 0 #self.motor_pid(self.velocity)
 
     def __cycle_loop_steering(self):
-        self.actuator_servo.angle = self.pipe_imageprocessing["angle"]
-        #self.actuator_servo.angle = self.transform_centerangle_to_angle(self.servo_pid(self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.heading))))
+        if len(self.pipe_imageprocessing) > 0:
+            angle = self.pipe_imageprocessing[-1]["angle"] * self.anglefactor
+            if angle > 180:
+                angle = 180
+            self.actuator_servo.angle = self.pipe_imageprocessing[-1]["angle"] * self.anglefactor
+            #self.actuator_servo.angle = self.transform_centerangle_to_angle(self.servo_pid(self.transform_angle_to_centerangle(self.transform_heading_to_angle(self.heading))))
 
     ### Calculations ###
     def process_calculations(self):
@@ -287,7 +293,7 @@ class McQueen:
         self.threads.append(IMUThread(self.pipe_imu, self.stop_event, self.init_event_imu, self.pause_event))
         self.threads.append(EncoderThread(self.pipe_encoder, self.stop_event, self.init_event_encoder, self.pause_event))
         self.threads.append(StatsThread(self.pipe_stats, self.stop_event, self.init_event_stats, self.pause_event))
-        self.threads.append(ImageProcessingThread(self.pipe_imageprocessing, self.stop_event, self.init_event_imageprocessing, self.pause_event))
+        self.threads.append(LowImageProcessingThread(self.pipe_imageprocessing, self.stop_event, self.init_event_imageprocessing, self.pause_event))
         self.threads.append(DataCollectionThread(None, self.stop_event, self.init_event_datacollection, self.pause_event, self.pipes))
         
     def threads_start(self):
