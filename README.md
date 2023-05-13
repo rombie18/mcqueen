@@ -4,7 +4,7 @@
 
 > “Ka-chow!” - Lightning Mcqueen
 
-A piece of python software to control an autonomous rc car with camera vision and odometry.
+A piece of Python software to control an autonomous rc car with camera vision and odometry.
 
 ## Working principle
 
@@ -48,16 +48,19 @@ Seperate threads include:
 Please follow the steps below to install the software on your Jetson Nano.
 
 1. Download the Jetson Nano SD card image **version 4.5.1**[^1]
-2. Write the `.img` file to the SD card using e.g. Rufus or Etcher 
-3. Clone this repository to your user directory:  
+2. Write the `.img` file to the SD card using e.g. Rufus or Etcher
+3. Insert SD card into Jetson Nano, connect internet and peripherals and power
+4. Follow the configuration wizard, **pick _mcqueen_ as username** 
+5. Clone this repository to your user directory:
    `cd ~`  
    `git clone https://github.com/rombie18/mcqueen`
-4. Run the installation script[^2] (with root permissions):  
+6. Run the installation script[^2] (with root permissions):  
    `cd mcqueen/Software/install`  
    `sudo -H bash ./install.sh`
-5. Install required drivers and additional software for the TIS camera[^3]
-6. Configure WiFi hotspot and pair Bluetooth controller
-7. Reinstall OpenCV on the Jetson Nano with CUDA support by following [this guide](https://qengineering.eu/install-opencv-4.5-on-jetson-nano.html) (this will enable the use of the GPU instead of CPU for image processing), **this step can take up to 3 hours!**
+7. Install required drivers and additional software for the TIS camera[^3]
+8. Configure WiFi hotspot and pair Bluetooth controller
+9. Reinstall OpenCV on the Jetson Nano with CUDA support by following [this guide](https://qengineering.eu/install-opencv-4.5-on-jetson-nano.html) (this will enable the use of the GPU instead of CPU for image processing), **this step can take up to 3 hours!**
+10. __Optional:__ Install Teamviewer Host for remote access[^4]
 
 
 ## Running the software
@@ -76,7 +79,13 @@ As configured by the installation script, the software should automatically star
 - Enable Graphical desktop environment: `sudo systemctl set-default graphical.target`
 - Temporarily disable Graphical desktop environment (until reboot): `sudo init 3 `
 
+## Additional notes
+- Connect jumper J48 to switch to DC barrel jack power, 4A @ 5VDC
+- Press down the SD card to remove
+- The Buck converter will not warn battery low voltage, don't discharge the LiPo battery under 6V
+- You can focus the fisheye lens of the camera by loosening the screw and turning the lens
 
 [^1]: https://developer.nvidia.com/embedded/l4t/r32_release_v5.1/r32_release_v5.1/jeston_nano/jetson-nano-jp451-sd-card-image.zip
 [^2]: The installation script will install libraries and configure a service automatically for you. This includes updating libraries, installing circuitpython, installing and enabling service,...
-[^3]: _https://www.theimagingsource.com/en-us/embedded/mipi-csi-2/36m/dfm36mx296ml/
+[^3]: https://www.theimagingsource.com/en-us/embedded/mipi-csi-2/36m/dfm36mx296ml/
+[^4]: https://www.teamviewer.com/en/download/linux/https://www.teamviewer.com/en/download/linux/
