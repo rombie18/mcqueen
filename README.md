@@ -1,6 +1,6 @@
 # McQueen
 
-![Lightning McQueen](https://media.tenor.com/UHy0nbKkmSYAAAAd/lightning-mcqueen-cars-movie.gif)
+![Lightning McQueen](https://i.pinimg.com/736x/7d/43/8c/7d438c6693b7844806db4ed3e8cab54f.jpg)
 
 > “Ka-chow!” - Lightning Mcqueen
 
@@ -8,7 +8,15 @@ A piece of python software to control an autonomous rc car with camera vision an
 
 ## Working principle
 
-The program will start by initialising the actuators (motor + servo), PID controllers and the controller. Next all other sensors or functions will be initialised and run in parallel as threads. Once all threads are initialised, the program will release all threads to start processing or collecting/writing data. The data is send over a pipe that will interconnect the threads with the main program.
+The program will start by initialising the actuators (motor + servo), PID controllers and the controller. Next all other sensors or functions will be initialised and run in parallel as threads. Once all threads are initialised, the program will release the threads to start processing or collecting/writing data. The data is then sent over a pipe that will interconnect the threads with the main program.
+
+Seperate threads include:
+- Collecting IMU/GYRO data
+- Collecting Encoder data
+- Collecting Controller data
+- Collecting Statistics (CPU, GPU, temps,...)
+- Doing Image Processing, lane detection and calculating steering angle (several versions)
+- Data collection to USB drive
 
 ## Folder structure
 ~\
@@ -56,7 +64,7 @@ Please follow the steps below to install the software on your Jetson Nano.
 
 As configured by the installation script, the software should automatically start running when the Jetson Nano boots up. If for any reason you would want the program to stop, you can gracefully terminate the process by executing `sudo systemctl stop mcqueen`. You can manually start the program by running the main python script in the main directory: `python drive.py`.
 
-> :warning: Make sure to provide power to the encoder when starting the robot, otherwise the Jetson Nano will crash!
+> :warning: Make sure to **provide power to the encoder** when starting the robot, otherwise the Jetson Nano will crash!
 
 ## Handy commands
 - Disable automatic start program on boot: `sudo systemctl disable mcqueen`
