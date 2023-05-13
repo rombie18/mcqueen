@@ -56,7 +56,7 @@ Please follow the steps below to install the software on your Jetson Nano.
 
 As configured by the installation script, the software should automatically start running when the Jetson Nano boots up. If for any reason you would want the program to stop, you can gracefully terminate the process by executing `sudo systemctl stop mcqueen`. You can manually start the program by running the main python script in the main directory: `python drive.py`.
 
-> :warning: Make sure to turn on power to the encoder when starting the program, otherwise the Jetson Nano will crash!
+> :warning: Make sure to provide power to the encoder when starting the robot, otherwise the Jetson Nano will crash!
 
 ## Handy commands
 - Disable automatic start program on boot: `sudo systemctl disable mcqueen`
