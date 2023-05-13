@@ -2,7 +2,7 @@
 
 ![Lightning McQueen](https://i.pinimg.com/736x/7d/43/8c/7d438c6693b7844806db4ed3e8cab54f.jpg)
 
-> “Ka-chow!” - Lightning Mcqueen
+> “Kachow!” - Lightning Mcqueen
 
 A piece of Python software to control an autonomous rc car with camera vision and odometry.
 
@@ -17,6 +17,8 @@ Seperate threads include:
 - Collecting Statistics (CPU, GPU, temps,...)
 - Doing Image Processing, lane detection and calculating steering angle (several versions)
 - Data collection to USB drive
+
+Altough the PID controllers are currently not being used, there are still two PID controllers programmed, one to control throttle and one to control steering angle. The first will make sure the robot moves at a constant velocity, the second will keep to robot moving in a bearing relative to start.
 
 ## Folder structure
 ~\
@@ -50,7 +52,7 @@ Please follow the steps below to install the software on your Jetson Nano.
 1. Download the Jetson Nano SD card image **version 4.5.1**[^1]
 2. Write the `.img` file to the SD card using e.g. Rufus or Etcher
 3. Insert SD card into Jetson Nano, connect internet and peripherals and power
-4. Follow the configuration wizard, **pick _mcqueen_ as username** 
+4. Follow the configuration wizard, **pick `mcqueen` as username** 
 5. Clone this repository to your user directory:
    `cd ~`  
    `git clone https://github.com/rombie18/mcqueen`
@@ -60,7 +62,7 @@ Please follow the steps below to install the software on your Jetson Nano.
 7. Install required drivers and additional software for the TIS camera[^3]
 8. Configure WiFi hotspot and pair Bluetooth controller
 9. Reinstall OpenCV on the Jetson Nano with CUDA support by following [this guide](https://qengineering.eu/install-opencv-4.5-on-jetson-nano.html) (this will enable the use of the GPU instead of CPU for image processing), **this step can take up to 3 hours!**
-10. __Optional:__ Install Teamviewer Host for remote access[^4]
+10. *Optional:* Install Teamviewer Host for remote access[^4]
 
 
 ## Running the software
