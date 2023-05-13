@@ -15,7 +15,7 @@ from busio import I2C
 from simple_pid import PID
 from pyjoystick.sdl2 import run_event_loop
 
-from customthreads import IMUThread, EncoderThread, StatsThread, SideImageProcessingThread, DataCollectionThread, ImageProcessingThread
+from customthreads import IMUThread, EncoderThread, StatsThread, DistanceProcessingThread, LowImageProcessingThread, SideImageProcessingThread, DataCollectionThread, ImageProcessingThread
 
 class McQueen:
     def __init__(self):
@@ -67,7 +67,7 @@ class McQueen:
         self.servo_pid.sample_time = 0.1
         # Max safe speed = 0.3,  Slow = 0.1,  AVG = 0.2
         self.motor_pid = PID(1, 0, 0, setpoint=0.2)
-        self.motor_pid.output_limits = (0, 0.2)
+        self.motor_pid.output_limits = (0, 0)
         self.motor_pid.sample_time = 0.1
 
         logging.info("Starting controller")
@@ -119,7 +119,7 @@ class McQueen:
         self.__cycle_loop_steering()
 
     def __cycle_loop_motor(self):
-        self.actuator_motor.throttle = 0.15 #self.motor_pid(self.velocity)
+        self.actuator_motor.throttle = 0#self.motor_pid(self.velocity)
 
     def __cycle_loop_steering(self):
         if len(self.pipe_imageprocessing) > 0:
@@ -269,7 +269,7 @@ class McQueen:
         self.init_event_stats = Event()
         self.init_event_imageprocessing = Event()
         self.init_event_datacollection = Event()
-        self.init_events.append(self.init_event_imu)
+        #self.init_events.append(self.init_event_imu)
         self.init_events.append(self.init_event_encoder)
         self.init_events.append(self.init_event_stats)
         self.init_events.append(self.init_event_imageprocessing)
@@ -290,10 +290,10 @@ class McQueen:
         }
 
         self.threads = []
-        self.threads.append(IMUThread(self.pipe_imu, self.stop_event, self.init_event_imu, self.pause_event))
+        #self.threads.append(IMUThread(self.pipe_imu, self.stop_event, self.init_event_imu, self.pause_event))
         self.threads.append(EncoderThread(self.pipe_encoder, self.stop_event, self.init_event_encoder, self.pause_event))
         self.threads.append(StatsThread(self.pipe_stats, self.stop_event, self.init_event_stats, self.pause_event))
-        self.threads.append(SideImageProcessingThread(self.pipe_imageprocessing, self.stop_event, self.init_event_imageprocessing, self.pause_event))
+        self.threads.append(DistanceProcessingThread(self.pipe_imageprocessing, self.stop_event, self.init_event_imageprocessing, self.pause_event))
         self.threads.append(DataCollectionThread(None, self.stop_event, self.init_event_datacollection, self.pause_event, self.pipes))
         
     def threads_start(self):

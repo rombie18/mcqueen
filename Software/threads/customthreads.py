@@ -20,6 +20,7 @@ from threading import Thread, Event
 from collections import deque
 from busio import I2C
 from adafruit_bno055 import BNO055_I2C
+from adafruit_hcsr04 import HCSR04
 import pyjoystick
 from pyjoystick.sdl2 import run_event_loop
 from jtop import jtop
@@ -299,78 +300,86 @@ class LowImageProcessingThread(Thread):
                     time.sleep(0.5)
                     continue
                 
-                if camera.snap_image(1):                                        
-                    # Load a frame (or image)
-                    video = camera.get_image()
+                try:
+                
+                    if camera.snap_image(1):                                        
+                        # Load a frame (or image)
+                        video = camera.get_image()
 
-                    X_lb=0
-                    Y_lb=0
-                    X_rb=0
-                    Y_rb=0
+                        X_lb=0
+                        Y_lb=0
+                        X_rb=0
+                        Y_rb=0
 
-                    h1= 0
-                    h2= 0
+                        h1= 0
+                        h2= 0
 
-                    #Specifying upper and lower ranges of color to detect in hsv format
-                    lower = numpy.array([137, 0 ,17 ])
-                    upper = numpy.array([180, 255 ,255 ])
-                    lower_2 = numpy.array([0, 0 ,0 ])
-                    upper_2 = numpy.array([0, 0 ,0 ])
+                        #Specifying upper and lower ranges of color to detect in hsv format
+                        lower = numpy.array([160, 100 ,16 ])
+                        upper = numpy.array([180, 255 ,255 ])
+                        lower_2 = numpy.array([0, 137 ,68 ])
+                        upper_2 = numpy.array([5, 255 ,255])
 
-                    hight, width, _ = video.shape #Get resolution
+                        hight, width, _ = video.shape #Get resolution
 
-                    video_cropped = video[307:hight, 0:width]
+                        video_cropped = video[353:hight, 0:width]
 
-                    video_hsv = cv2.cvtColor(video_cropped, cv2.COLOR_BGR2HSV) #Converting BGR image to HSV format
+                        video_hsv = cv2.cvtColor(video_cropped, cv2.COLOR_BGR2HSV) #Converting BGR image to HSV format
 
-                    mask_video_1 = cv2.inRange(video_hsv, lower, upper) # Masking the image to find our color
-                    mask_video_2 = cv2.inRange(video_hsv, lower_2, upper_2)
+                        mask_video_1 = cv2.inRange(video_hsv, lower, upper) # Masking the image to find our color
+                        mask_video_2 = cv2.inRange(video_hsv, lower_2, upper_2)
 
-                    mask_video = mask_video_1 | mask_video_2
+                        mask_video = mask_video_1 | mask_video_2
 
-                    mask_leftBand = mask_video[0:hight, int(200):int(250)] #Crop right band
-                    mask_rightBand = mask_video[0:hight, int(width-250):int(width-200)] #crop left band
+                        mask_leftBand = mask_video[0:hight, int(100):int(120)] #Crop right band
+                        mask_rightBand = mask_video[0:hight, int(width-120):int(width-100)] #crop left band
 
-                    mask_contours_leftBand, hierarchy = cv2.findContours(mask_leftBand, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE) #Finding contours in mask image (leftband)
-                    mask_contours_rightBand, hierarchy = cv2.findContours(mask_rightBand, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE) #Finding contours in mask image (rightband)
+                        mask_contours_leftBand, hierarchy = cv2.findContours(mask_leftBand, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE) #Finding contours in mask image (leftband)
+                        mask_contours_rightBand, hierarchy = cv2.findContours(mask_rightBand, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE) #Finding contours in mask image (rightband)
+                    
+                        # Finding position of all contours of the bands
+                        if len(mask_contours_leftBand or mask_contours_rightBand) != 0:
+                            for i_lb, k_rb in zip(mask_contours_leftBand, mask_contours_rightBand):
+                                if cv2.contourArea(i_lb) > 500:
+                                    x1, y1, w1, h1 = cv2.boundingRect(i_lb)
+                                    cv2.rectangle(video_cropped, (x1+200, y1), (x1 + w1+200, y1 + h1), (0, 0, 255), 3) #drawing rectangle
+                                
+                                if cv2.contourArea(k_rb) > 500:
+                                    x2, y2, w2, h2 = cv2.boundingRect(k_rb)
+                                    cv2.rectangle(video_cropped, ((width-x2-250), y2), (((width-x2-250) + w2), (y2 + h2)), (255, 0, 0), 3) #drawing rectangle (formula needed, otherwise it will add it on the left side)
 
-                    # Finding position of all contours of the bands
-                    if len(mask_contours_leftBand or mask_contours_rightBand) != 0:
-                        for i_lb, k_rb in zip(mask_contours_leftBand, mask_contours_rightBand):
-                            if cv2.contourArea(i_lb) > 500:
-                                x1, y1, w1, h1 = cv2.boundingRect(i_lb)
-                                X_lb = int(x1+(w1/2)) #calculate center of rectangle
-                                Y_lb = int(y1+(h1/2))
-                                cv2.rectangle(video_cropped, (x1+200, y1), (x1 + w1+200, y1 + h1), (0, 0, 255), 3) #drawing rectangle
+                            diff = 1
+                            if h1 and h2 !=0:
+                                if h1<h2:
+                                    diff = h1/h2
+                                if h1>h2:
+                                    diff = h2/h1
+
+                            if (diff > 0.9) and (diff < 1):
+                                print("Go straight")
+                                angle= 90
+                            if h1>h2: #h1>h2
+                                angle = 116.47*diff - 26.47
+                                print("Go right, with angle:", angle)
+                            if h1<h2: #h1<h2
+                                angle = -113.47*diff + 203.47
+                                print("Go left, with angle:", angle)
+                                
+                            if angle < 0:
+                                angle = 0
+                                
+                            if angle > 180:
+                                angle = 180
                             
-                            if cv2.contourArea(k_rb) > 500:
-                                x2, y2, w2, h2 = cv2.boundingRect(k_rb)
-                                X_rb = int(width-(x2+(w2/2))) #calculate center of rectangle
-                                Y_rb = int(y2+(h2/2))
-                                cv2.rectangle(video_cropped, ((width-x2-250), y2), (((width-x2-250) + w2), (y2 + h2)), (255, 0, 0), 3) #drawing rectangle (formula needed, otherwise it will add it on the left side)
-
+                            # Append result to pipe
+                            data = {
+                                'time': datetime.now(),
+                                'angle': angle
+                            }
+                            self.pipe.append(data)
                             
-                        diff = 1
-                        if h2 != 0:
-                            diff = h1/h2
-                        if (diff > 0.9) and (diff < 1.1):
-                            angle = 90
-                            print("Go straight")
-                        if diff > 1.1: #h1>h2
-                            norm = 1-(h1-h2)/h1
-                            angle = 90*norm
-                            print("Go right, with angle:", angle)
-                        if diff < 0.9: #h1<h2
-                            norm = ((h2-h1)/h2)
-                            angle = 90+90*norm
-                            print("Go left, with angle:", angle)
-                        
-                        # Append result to pipe
-                        data = {
-                            'time': datetime.now(),
-                            'angle': angle
-                        }
-                        self.pipe.append(data)
+                except:
+                    logging.warning("Unable to process frame")
                                 
         except Exception as exception:
             logging.error(exception)
@@ -402,7 +411,6 @@ class SideImageProcessingThread(Thread):
 
             h1= 0
             h2= 0
-            fixed_value = 400
             
             #Specifying upper and lower ranges of color to detect in hsv format
             lower = numpy.array([168, 40 ,0 ])
@@ -438,26 +446,14 @@ class SideImageProcessingThread(Thread):
                 mask_rightBand = mask_video[0:hight, int(width-250):int(width-220)] #crop left band
 
                 mask_contours_leftBand, hierarchy = cv2.findContours(mask_leftBand, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE) #Finding contours in mask image (leftband)
-                mask_contours_rightBand, hierarchy = cv2.findContours(mask_rightBand, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE) #Finding contours in mask image (rightband)
 
                 # Finding position of all contours of the bands
-                if len(mask_contours_leftBand or mask_contours_rightBand) != 0:
-                    for i_lb, k_rb in zip(mask_contours_leftBand, mask_contours_rightBand):
-                        if cv2.contourArea(i_lb) > 500:
-                            x1, y1, w1, h1 = cv2.boundingRect(i_lb)
-                            cv2.rectangle(video_cropped, (x1+200, y1), (x1 + w1+200, y1 + h1), (0, 0, 255), 3) #drawing rectangle
-                        
-                        if cv2.contourArea(k_rb) > 500:
-                            x2, y2, w2, h2 = cv2.boundingRect(k_rb)
-                            X_rb = int(width-(x2+(w2/2))) #calculate center of rectangle
-                            Y_rb = int(y2+(h2/2))
-                            cv2.rectangle(video_cropped, ((width-x2-250), y2), (((width-x2-250) + w2), (y2 + h2)), (255, 0, 0), 3) #drawing rectangle (formula needed, otherwise it will add it on the left side)
-
-                    angle1 = 1269.3 * math.exp(-0.008 * h1)
-                    angle2 = 1269.3 * math.exp(-0.008 * h2)
-
-                    angle = (angle1 + angle2) / 2
-                    #angle = 2*10^-9 * h1^4 - 6*10^-6 * h1^3 + 0.0071*h1^2 - 3.6433*h1 + 760.07
+                if len(mask_contours_leftBand) != 0:
+                    for i_lb in mask_contours_leftBand:
+                        x1, y1, w1, h1 = cv2.boundingRect(i_lb)
+                        cv2.rectangle(video_cropped, (x1+200, y1), (x1 + w1+200, y1 + h1), (0, 0, 255), 3) #drawing rectangle
+                              
+                    angle = -0.2705*h1 + 204.54
                     
                     if angle < 0:
                         angle = 0
@@ -544,3 +540,47 @@ class DataCollectionThread(Thread):
                     writer.writerow(list(pipe[0].keys()))
                     for item in pipe:
                         writer.writerow(item.values())
+                        
+
+class DistanceProcessingThread(Thread):
+    def __init__(self, pipe, stop_event, init_event, pause_event):
+        super(DistanceProcessingThread, self).__init__(name="DistanceProcessingThread")
+        
+        self.pipe: deque = pipe
+        self.stop_event: Event = stop_event
+        self.init_event: Event = init_event
+        self.pause_event: Event = pause_event
+
+    def run(self):
+        try:
+            logging.getLogger()
+            
+            logging.info("Initialising Distance Processing...")
+            
+            with HCSR04(trigger_pin=board.D16, echo_pin=board.D19) as sonar:
+
+                self.init_event.set()
+                
+                logging.info("Distance Processing initialised.")
+                while not self.stop_event.is_set():
+                    if self.pause_event.is_set():
+                        time.sleep(0.5)
+                        continue
+                
+                    print(sonar.distance)
+                
+                    """
+                    # Append result to pipe
+                    data = {
+                        'time': datetime.now(),
+                        'angle': None
+                    }
+                    self.pipe.append(data)
+                    """
+                    
+        except Exception as exception:
+            logging.error(exception)
+            traceback.print_exc()
+            self.stop_event.set()
+        finally:
+            logging.info("Stopped Distance Processing")
