@@ -20,7 +20,8 @@ The program will start by initialising the actuators (motor + servo), PID contro
 &emsp;&emsp;&emsp;&emsp;├── libs\
 &emsp;&emsp;&emsp;&emsp;├── main\
 &emsp;&emsp;&emsp;&emsp;├── testing\
-&emsp;&emsp;&emsp;&emsp;└── videos
+&emsp;&emsp;&emsp;&emsp;├── videos\
+&emsp;&emsp;&emsp;&emsp;└── main.sh
 
 - `~`: Home directory of user, navigate to this with `cd ~` or just `cd`
    - `mcqueen`: The directory name of the repository
@@ -32,6 +33,7 @@ The program will start by initialising the actuators (motor + servo), PID contro
          - `main`: Contains the main programs to drive the robot, to record camera footage and to run lane detection seperately
          - `testing`: Contains various testing scripts to individually test software or hardware components
          - `videos`: Contains recorder footage of the robot in operation (this folder does not get synched to git)
+         - **`main.sh`: This is the entry point of the robot. This script will be run when starting the mcqueen service on boot**
 
 ## Installation
 
@@ -52,9 +54,9 @@ Please follow the steps below to install the software on your Jetson Nano.
 
 ## Running the software
 
-As configured by the installation script, the software should automatically start running when the Jetson Nano boots up. If for any reason you would want the program to stop, you can gracefully terminate the process by executing `sudo systemctl stop mcqueen`. You can manually start the program by running the main python script `python drive.py`.
+As configured by the installation script, the software should automatically start running when the Jetson Nano boots up. If for any reason you would want the program to stop, you can gracefully terminate the process by executing `sudo systemctl stop mcqueen`. You can manually start the program by running the main python script in the main directory: `python drive.py`.
 
-> :warning: Make sure to turn on power to the encoder when using, otherwise the Jetson Nano may crash without warning 
+> :warning: Make sure to turn on power to the encoder when starting the program, otherwise the Jetson Nano will crash!
 
 ## Handy commands
 - Disable automatic start program on boot: `sudo systemctl disable mcqueen`
@@ -68,5 +70,5 @@ As configured by the installation script, the software should automatically star
 
 
 [^1]: https://developer.nvidia.com/embedded/l4t/r32_release_v5.1/r32_release_v5.1/jeston_nano/jetson-nano-jp451-sd-card-image.zip
-[^2]: _The installation script will install libraries and configure a services automatically for you. This includes updating libraries, installing circuitpython, installing and enabling service,..._
+[^2]: The installation script will install libraries and configure a service automatically for you. This includes updating libraries, installing circuitpython, installing and enabling service,...
 [^3]: _https://www.theimagingsource.com/en-us/embedded/mipi-csi-2/36m/dfm36mx296ml/
