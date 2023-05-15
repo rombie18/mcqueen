@@ -22,6 +22,7 @@ pip3 install -r requirements.txt
 apt install -y python3-matplotlib
 
 # Configure system service
+systemctl disable mcqueen.service
 chmod +x mcqueen-service.sh
 cp mcqueen.service /etc/systemd/system/mcqueen.service
 systemctl daemon-reload

@@ -147,9 +147,9 @@ class StatsThread(Thread):
         finally:
             logging.info("Stopped Stats")
         
-class ImageProcessingThread(Thread):
+class HighImageProcessingThread(Thread):
     def __init__(self, pipe, stop_event, init_event, pause_event):
-        super(ImageProcessingThread, self).__init__(name="ImageProcessingThread")
+        super(HighImageProcessingThread, self).__init__(name="HighImageProcessingThread")
         
         self.pipe: deque = pipe
         self.stop_event: Event = stop_event
@@ -256,6 +256,111 @@ class ImageProcessingThread(Thread):
 
                     except:
                         logging.warn("Unable to process image")
+                                
+        except Exception as exception:
+            logging.error(exception)
+            traceback.print_exc()
+            self.stop_event.set()
+        finally:
+            logging.info("Stopped Image Processing")
+
+class HighWebcamImageProcessingThread(Thread):
+    def __init__(self, pipe, stop_event, init_event, pause_event):
+        super(HighWebcamImageProcessingThread, self).__init__(name="HighWebcamImageProcessingThread")
+        
+        self.pipe: deque = pipe
+        self.stop_event: Event = stop_event
+        self.init_event: Event = init_event
+        self.pause_event: Event = pause_event
+
+    def run(self):
+        try:
+            logging.getLogger()
+            
+            logging.info("Initialising Image Processing...")
+            
+            camera = cv2.VideoCapture(2)
+            
+            self.init_event.set()
+            
+            logging.info("Image Processing initialised.")
+            while not self.stop_event.is_set():
+                if self.pause_event.is_set():
+                    time.sleep(0.5)
+                    continue
+                
+                try:                                  
+                    # Load a frame (or image)
+                    _, original_frame = camera.read()
+                    
+                    # Discard unwanted part of image
+                    original_height, original_width, original_channels = original_frame.shape
+                    cropped_frame = original_frame[280:original_height, 0:original_width]
+                    
+                    # Create a Lane object
+                    lane_obj = Lane(orig_frame=cropped_frame)
+                    
+                    # Perform thresholding to isolate lane lines
+                    lane_line_markings = lane_obj.get_line_markings()
+                    # If there are less than 50 'lane' pixels detected, skip calculations
+                    #if numpy.sum(lane_line_markings == 255) < 50:
+                    #    continue
+                    
+                    # Plot the region of interest on the image
+                    lane_obj.plot_roi(plot=False)
+                    
+                    # Perform the perspective transform to generate a bird's eye view
+                    # If Plot == True, show image with new region of interest
+                    warped_frame = lane_obj.perspective_transform(plot=False)
+                    
+                    # If detected to little pixels, skip futher calculations
+                    detected_pixels = numpy.sum(warped_frame == 255)
+                    if detected_pixels < 3000:
+                        logging.debug("Only {} valid pixels, skipping this frame".format(detected_pixels))
+                        continue
+                    
+                    # Generate the image histogram to serve as a starting point
+                    # for finding lane line pixels
+                    histogram = lane_obj.calculate_histogram(plot=False)  
+                        
+                    # Find lane line pixels using the sliding window method 
+                    left_fit, right_fit = lane_obj.get_lane_line_indices_sliding_windows(
+                        plot=False)
+                    
+                    # Fill in the lane line
+                    lane_obj.get_lane_line_previous_window(left_fit, right_fit, plot=False)
+                        
+                    # Overlay lines on the original frame
+                    frame_with_lane_lines = lane_obj.overlay_lane_lines(plot=False)
+                    
+                    # Calculate lane line curvature (left and right lane lines)
+                    lane_obj.calculate_curvature(print_to_terminal=False)
+                    
+                    # Calculate center offset                                                                 
+                    lane_obj.calculate_car_position(print_to_terminal=False)
+
+                    # Calculate turning angle
+                    wheel_base = 0.3
+                    curvem = (lane_obj.left_curvem + lane_obj.right_curvem) / 2
+                    angle = math.degrees(math.atan(wheel_base / curvem)) * 6 + 90
+
+                    logging.debug("Curve radius left: " + str(angle))
+                    logging.debug("Curve radius right: " + str(angle))
+                    logging.debug("Steering angle: " + str(angle))
+
+                    # Append result to pipe
+                    data = {
+                        'time': datetime.now(),
+                        'center_offset': lane_obj.center_offset,
+                        'left_curvem': lane_obj.left_curvem,
+                        'right_curvem': lane_obj.right_curvem,
+                        'curvem': curvem,
+                        'angle': angle
+                    }
+                    self.pipe.append(data)
+
+                except:
+                    logging.warn("Unable to process image")
                                 
         except Exception as exception:
             logging.error(exception)
