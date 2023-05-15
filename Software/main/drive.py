@@ -15,7 +15,7 @@ from busio import I2C
 from simple_pid import PID
 from pyjoystick.sdl2 import run_event_loop
 
-from customthreads import IMUThread, EncoderThread, StatsThread, DistanceProcessingThread, LowImageProcessingThread, SideImageProcessingThread, DataCollectionThread, ImageProcessingThread
+from customthreads import IMUThread, EncoderThread, StatsThread, DistanceProcessingThread, LowImageProcessingThread, SideImageProcessingThread, DataCollectionThread, HighWebcamImageProcessingThread
 
 class McQueen:
     def __init__(self):
@@ -293,7 +293,7 @@ class McQueen:
         #self.threads.append(IMUThread(self.pipe_imu, self.stop_event, self.init_event_imu, self.pause_event))
         self.threads.append(EncoderThread(self.pipe_encoder, self.stop_event, self.init_event_encoder, self.pause_event))
         self.threads.append(StatsThread(self.pipe_stats, self.stop_event, self.init_event_stats, self.pause_event))
-        self.threads.append(DistanceProcessingThread(self.pipe_imageprocessing, self.stop_event, self.init_event_imageprocessing, self.pause_event))
+        self.threads.append(LowImageProcessingThread(self.pipe_imageprocessing, self.stop_event, self.init_event_imageprocessing, self.pause_event))
         self.threads.append(DataCollectionThread(None, self.stop_event, self.init_event_datacollection, self.pause_event, self.pipes))
         
     def threads_start(self):

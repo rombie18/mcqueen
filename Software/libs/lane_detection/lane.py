@@ -40,10 +40,10 @@ class Lane:
     # Four corners of the trapezoid-shaped region of interest
     # You need to find these corners manually.
     self.roi_points = np.float32([
-      (460,0), # Top-left corner
-      (0, 330), # Bottom-left corner            
-      (1280,330), # Bottom-right corner
-      (820,0) # Top-right corner
+      (680,85), # Top-left corner
+      (0, 450), # Bottom-left corner            
+      (1920,450), # Bottom-right corner
+      (1240,85) # Top-right corner
     ])
          
     # The desired corner locations  of the region of interest

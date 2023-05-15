@@ -294,11 +294,11 @@ class HighWebcamImageProcessingThread(Thread):
                     _, original_frame = camera.read()
                     
                     # Discard unwanted part of image
-                    original_height, original_width, original_channels = original_frame.shape
-                    cropped_frame = original_frame[280:original_height, 0:original_width]
+                    #original_height, original_width, original_channels = original_frame.shape
+                    #cropped_frame = original_frame[280:original_height, 0:original_width]
                     
                     # Create a Lane object
-                    lane_obj = Lane(orig_frame=cropped_frame)
+                    lane_obj = Lane(orig_frame=original_frame)
                     
                     # Perform thresholding to isolate lane lines
                     lane_line_markings = lane_obj.get_line_markings()
@@ -312,12 +312,6 @@ class HighWebcamImageProcessingThread(Thread):
                     # Perform the perspective transform to generate a bird's eye view
                     # If Plot == True, show image with new region of interest
                     warped_frame = lane_obj.perspective_transform(plot=False)
-                    
-                    # If detected to little pixels, skip futher calculations
-                    detected_pixels = numpy.sum(warped_frame == 255)
-                    if detected_pixels < 3000:
-                        logging.debug("Only {} valid pixels, skipping this frame".format(detected_pixels))
-                        continue
                     
                     # Generate the image histogram to serve as a starting point
                     # for finding lane line pixels
@@ -341,11 +335,14 @@ class HighWebcamImageProcessingThread(Thread):
 
                     # Calculate turning angle
                     wheel_base = 0.3
-                    curvem = (lane_obj.left_curvem + lane_obj.right_curvem) / 2
-                    angle = math.degrees(math.atan(wheel_base / curvem)) * 6 + 90
+                    if lane_obj.left_curvem < lane_obj.right_curvem:
+                        curvem = lane_obj.left_curvem
+                    else:
+                        curvem = lane_obj.right_curvem
+                    angle = math.degrees(math.atan(wheel_base * 2666 / (curvem * 55))) + 90
 
-                    logging.debug("Curve radius left: " + str(angle))
-                    logging.debug("Curve radius right: " + str(angle))
+                    logging.debug("Curve radius left: " + str(lane_obj.left_curvem))
+                    logging.debug("Curve radius right: " + str(lane_obj.right_curvem))
                     logging.debug("Steering angle: " + str(angle))
 
                     # Append result to pipe
@@ -420,7 +417,7 @@ class LowImageProcessingThread(Thread):
                         h2= 0
 
                         #Specifying upper and lower ranges of color to detect in hsv format
-                        lower = numpy.array([160, 100 ,16 ])
+                        lower = numpy.array([155, 104 ,20 ])
                         upper = numpy.array([180, 255 ,255 ])
                         lower_2 = numpy.array([0, 137 ,68 ])
                         upper_2 = numpy.array([5, 255 ,255])
