@@ -18,13 +18,14 @@ Seperate threads include:
 - Doing Image Processing, lane detection and calculating steering angle (several versions)
 - Data collection to USB drive
 
-Altough the PID controllers are currently not being used, there are still two PID controllers programmed, one to control throttle and one to control steering angle. The first will make sure the robot moves at a constant velocity, the second will keep to robot moving in a bearing relative to start.
+Altough the PID controllers are currently not being used, there are still two PID controllers programmed, one to control throttle and one to control steering angle. The first will make sure the robot moves at a constant velocity, the second will keep to robot moving with a bearing relative to start.
 
 ## Folder structure
 ~\
 └── mcqueen\
 &emsp;&emsp;├── Drawings\
 &emsp;&emsp;└── Software\
+&emsp;&emsp;&emsp;&emsp;├── dev\
 &emsp;&emsp;&emsp;&emsp;├── images\
 &emsp;&emsp;&emsp;&emsp;├── install\
 &emsp;&emsp;&emsp;&emsp;├── libs\
@@ -37,6 +38,7 @@ Altough the PID controllers are currently not being used, there are still two PI
    - `mcqueen`: The directory name of the repository
       - `Drawings`: Contains all 3D drawings for different plates and mounting brackets
       - `Software`: Contains the software for the robot
+         - `dev`: Contains various scripts for testing and debugging purposes thay may not fully work
          - `images`: Contains various images used for testing and calibrating
          - `install`: Contains the installation script and other important scripts/libraries for the installation of the robot
          - `libs`: Contains custom libraries for the encoder, camera and lane detection
@@ -62,12 +64,13 @@ Please follow the steps below to install the software on your Jetson Nano.
 7. Install required drivers and additional software for the TIS camera[^3]
 8. Configure WiFi hotspot and pair Bluetooth controller
 9. Reinstall OpenCV on the Jetson Nano with CUDA support by following [this guide](https://qengineering.eu/install-opencv-4.5-on-jetson-nano.html) (this will enable the use of the GPU instead of CPU for image processing), **this step can take up to 3 hours!**
-10. *Optional:* Install Teamviewer Host for remote access[^4]
+10. *Optional:* Install Teamviewer Host for remote access over the internet[^4]
+11. *Optional:* Enable VNC Server for local remote access[^5]
 
 
 ## Running the software
 
-As configured by the installation script, the software should automatically start running when the Jetson Nano boots up. If for any reason you would want the program to stop, you can gracefully terminate the process by executing `sudo systemctl stop mcqueen`. You can manually start the program by running the main python script in the main directory: `python drive.py`.
+As configured by the installation script, the software should automatically start running when the Jetson Nano boots up. If for any reason you would want the program to stop, you can gracefully terminate the process by executing `sudo systemctl stop mcqueen`. You can start it again with `sudo systemctl stop mcqueen`. If you would want immediate feedback for testing, you can also manually start the program by running the main python script in the main directory: `python drive.py`.
 
 > :warning: Make sure to **provide power to the encoder** when starting the robot, otherwise the Jetson Nano will crash!
 
@@ -91,3 +94,4 @@ As configured by the installation script, the software should automatically star
 [^2]: The installation script will install libraries and configure a service automatically for you. This includes updating libraries, installing circuitpython, installing and enabling service,...
 [^3]: https://www.theimagingsource.com/en-us/embedded/mipi-csi-2/36m/dfm36mx296ml/
 [^4]: https://www.teamviewer.com/en/download/linux/https://www.teamviewer.com/en/download/linux/
+[^5]: https://developer.nvidia.com/embedded/learn/tutorials/vnc-setup
