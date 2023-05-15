@@ -1,6 +1,6 @@
 # McQueen
 
-![Lightning McQueen](https://i.pinimg.com/736x/7d/43/8c/7d438c6693b7844806db4ed3e8cab54f.jpg)
+![Lightning McQueen](https://a1cf74336522e87f135f-2f21ace9a6cf0052456644b80fa06d4f.ssl.cf2.rackcdn.com/images/characters/large/800/Lightning-McQueen.Cars.webp)
 
 > “Kachow!” - Lightning Mcqueen
 
